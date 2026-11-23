@@ -11,7 +11,7 @@ A Unity Editor validation harness checks the deterministic validation rules and 
 
 ## Coverage
 
-The runner includes 36 checks covering:
+The runner includes 44 checks covering:
 - Normal, excessive, vertical, non-finite, and invalid-tolerance movement.
 - Fire cadence, backwards timestamps, empty magazines, and reload blocking.
 - Damage bounds, pickup distance, and inventory limits.
@@ -19,6 +19,9 @@ The runner includes 36 checks covering:
 - Authoritative movement and firing state.
 - Reload start, early completion rejection, and successful completion.
 - Server snapshots, ammo pickups, damage, elimination, and post-elimination movement rejection.
+- Server line-of-sight rejection for wall-obstructed hits.
+- Normal headshots, suspicious headshot ratios/streaks, and backwards hit timestamps.
+- Authoritative hit application and blocked-hit rejection.
 
 ## Important limitation
 
