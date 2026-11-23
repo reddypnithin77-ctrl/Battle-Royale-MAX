@@ -8,6 +8,7 @@ The Unity Test Framework Play Mode suite is in `Assets/Tests/PlayMode`.
 - Grounded jump produces upward movement
 - Crouch smoothly reduces controller height
 - Sprint covers more distance than walking
+- Weapon firing consumes ammo and adds upward recoil
 - Weapon reload transfers reserve ammo into the magazine
 - Vehicle throttle accelerates its Rigidbody
 - Vehicle braking reduces forward speed
