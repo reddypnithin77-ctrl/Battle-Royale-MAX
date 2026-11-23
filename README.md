@@ -1,33 +1,20 @@
-# Battle Royale MAX — Unity Android Starter
+# Battle Royale MAX — Original prototype
 
-An original battle-royale prototype starter. It is **not Free Fire MAX** and does not contain Garena assets, maps, characters, branding, or code.
+An original battle-royale project. It is **not Free Fire MAX** and does not use Garena assets, characters, maps, branding, or proprietary code.
 
-## Current scope
-This is a code starter, not a finished game or APK. It provides a basic third-person controller, camera, safe-zone prototype, health component, and project setup notes. The first milestone is a local playable prototype. Real online multiplayer comes after the movement/combat loop is tested.
+## Browser prototype
+A small **single-player browser prototype** lives in `docs/index.html`. It demonstrates movement, mouse aiming, firing at training bots, health, and a shrinking safe zone. It is not a full 3D game and does not connect real players.
 
-## Engine
-- Unity 6 (3D Core)
-- Android Build Support (SDK/NDK + OpenJDK installed through Unity Hub)
-- C# scripts in `Assets/Scripts`
+After enabling GitHub Pages under **Settings → Pages → Build and deployment → GitHub Actions**, the workflow deploys it at:
+`https://reddypnithin77-ctrl.github.io/Battle-Royale-MAX/`
 
-## Setup
-1. Create a new Unity 6 3D project.
-2. Copy `Assets/` from this package into the project.
-3. Create a Plane named `Ground` and add a Collider.
-4. Create a Capsule named `Player`; add a `CharacterController`; attach `PlayerController.cs` and `Health.cs`.
-5. Add a Camera and attach `ThirdPersonCamera.cs`; assign the Player transform to `target`.
-6. Create an empty object named `SafeZone`; attach `SafeZone.cs`; assign a visible cylinder or ring as `visual`.
-7. Press Play. Desktop keyboard controls are WASD + mouse; Android touch UI is a later milestone.
+## Unity Android starter
+`Assets/Scripts` contains the initial Unity C# controller, camera, health and safe-zone scripts. See [Unity setup](Assets/Scripts/README.md) and [roadmap](Docs/ROADMAP.md). This is not an Android APK.
 
-## Android build
-In Unity: File → Build Profiles → Android → Switch Platform. Set a unique application identifier, choose ARM64, then Build. This package does not include a signed release APK.
+## Not implemented yet
+- Production 3D assets and full Android touch controls
+- Real online matchmaking, networking, accounts, or 50-player dedicated servers
+- Release signing, anti-cheat, moderation, or production backend
 
-## Multiplayer plan
-Do not trust client-reported hits, health, loot, or match results. The production version needs a server-authoritative session service:
-- matchmaking and room allocation
-- server-owned movement validation and combat resolution
-- replicated player state
-- disconnect/reconnect handling
-- moderation, reporting, and rate limits
-
-Recommended next milestone: integrate a multiplayer SDK/backend after the local controller and safe-zone loop work reliably. A 50-player match needs dedicated server capacity, load testing, and operational monitoring; it is not included here.
+## Run locally
+Open `docs/index.html` in a modern browser. Desktop: WASD/arrow keys to move, mouse to aim, click or Space to fire. Mobile: drag to move and tap to fire.
