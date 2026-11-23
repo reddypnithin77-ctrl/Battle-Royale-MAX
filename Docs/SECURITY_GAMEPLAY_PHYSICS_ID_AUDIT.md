@@ -45,15 +45,20 @@ The repository contains a local training prototype and some server-validation ex
 ### Fixed in this audit
 
 - Health components now reject NaN/infinite damage and healing values and normalize invalid maximum-health values.
-- Vehicle controls now reject non-finite input values and normalize invalid physics tuning values.
+- Vehicle controls now reject non-finite input values and normalize invalid physics tuning values; forward/reverse velocity components are capped and ground probing uses a sphere cast.
 - Mobile movement input now rejects non-finite vectors before passing them to the movement controller.
+- Player standing height now waits until an overlap-capsule check confirms overhead clearance.
+- Loot selection now honors each entry's configured active-item limit.
+- Authoritative ammo claims require unique server-owned pickup IDs and a consumed pickup cannot be claimed twice.
+- Hit resolution now requires a recent accepted shot and prevents the same shot from being resolved repeatedly.
+- An optional Unity Authentication guest sign-in adapter and a Node.js backend token-verification starter have been added. The adapter is compile-gated until the Unity Services packages and scripting define are configured.
 
 ## Verification limits
 
 - The existing anti-cheat harness previously passed 44 rule checks. That verifies only its standalone validation logic.
 - The eight Unity Play Mode tests are present but have not been run in Unity Editor.
 - Unity compilation, actual physics behavior, Android builds, server integration, authentication, and device testing remain unverified.
-- The repository currently lacks the normal Unity project metadata/package manifest needed for a reproducible clean checkout, according to the earlier project inspection.
+- The repository currently lacks the normal Unity project metadata/package manifest needed for a reproducible clean checkout, according to the earlier project inspection. The authentication adapter is therefore optional and will not compile into the game until Unity Services packages and its scripting define are configured.
 
 ## Release gate checklist
 
