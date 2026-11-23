@@ -7,6 +7,11 @@ public static class BRServerValidationRuleChecks
     [MenuItem("Tools/Battle Royale/Run Anti-Cheat Rule Checks")]
     public static void Run()
     {
+        RunChecks();
+    }
+
+    public static int RunChecks()
+    {
         int passed = 0;
         int failed = 0;
 
@@ -96,6 +101,7 @@ public static class BRServerValidationRuleChecks
         string summary = "Anti-cheat rule checks: " + passed + " passed, " + failed + " failed.";
         if (failed == 0) Debug.Log("<color=green>" + summary + "</color>");
         else Debug.LogError(summary);
+        return failed;
     }
 
     private static void Check(string label, bool actual, bool expected, ref int passed, ref int failed)
