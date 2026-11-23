@@ -30,6 +30,10 @@ All place names and structures are original. The layout does not reproduce a rea
 
 The buildings are built from primitive geometry so they are easy to edit. Their appearance is intentionally simple and should later be replaced with optimized, original models, textures, props, and lighting.
 
+## Landscape mobile layout
+
+The generated scene adds `BRLandscapeMode`, which disables portrait orientation and allows both landscape directions. The mobile HUD and touch controls use a 1920×1080 reference canvas so their anchored positions are designed for horizontal screens.
+
 ## Generate the scene
 
 1. Open the Unity project.
@@ -42,4 +46,4 @@ If the menu does not appear, check the Unity Console for compile errors. A packa
 
 ## Prototype limitations
 
-This is a greybox practice environment, not a finished production map. Loot is local prototype pickup behavior; it is not server-authoritative multiplayer loot. The map has not yet been visually or performance-tested on Android. Replace primitive geometry with original or properly licensed assets and profile the scene on target devices before release.
+This is a greybox practice environment, not a finished production map. Loot is local prototype pickup behavior; it is not server-authoritative multiplayer loot. The map and landscape layout have not yet been visually or performance-tested on Android. Replace primitive geometry with original or properly licensed assets and profile the scene on target devices before release.
