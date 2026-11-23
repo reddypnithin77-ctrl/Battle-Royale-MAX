@@ -11,7 +11,9 @@ public class BRAuthoritativeMatchService
         public float lastMoveTime;
         public float lastShotTime = -999f;
         public int ammo;
+        public int magazineSize;
         public int reserveAmmo;
+        public float reloadEndsAt;
         public int health;
         public bool reloading;
         public float maximumSpeed;
@@ -27,10 +29,10 @@ public class BRAuthoritativeMatchService
     }
 
     public bool RegisterPlayer(string authenticatedPlayerId, Vector3 spawnPosition, float serverTime,
-        float maximumSpeed = 5.5f, int magazineAmmo = 30, int reserveAmmo = 90, int health = 100)
+        float maximumSpeed = 5.5f, int magazineAmmo = 30, int reserveAmmo = 90, int health = 100, int magazineSize = 30)
     {
         if (string.IsNullOrWhiteSpace(authenticatedPlayerId) || players.ContainsKey(authenticatedPlayerId) ||
-            maximumSpeed <= 0f || magazineAmmo < 0 || reserveAmmo < 0 || health <= 0)
+            maximumSpeed <= 0f || magazineAmmo < 0 || reserveAmmo < 0 || health <= 0 || magazineSize <= 0 || magazineAmmo > magazineSize)
             return false;
 
         players.Add(authenticatedPlayerId, new PlayerState
@@ -39,6 +41,7 @@ public class BRAuthoritativeMatchService
             lastMoveTime = serverTime,
             maximumSpeed = maximumSpeed,
             ammo = magazineAmmo,
+            magazineSize = magazineSize,
             reserveAmmo = reserveAmmo,
             health = health
         });
@@ -103,13 +106,28 @@ public class BRAuthoritativeMatchService
         return true;
     }
 
-    public bool TrySetReloading(string authenticatedPlayerId, bool reloading)
+    public bool TryBeginReload(string authenticatedPlayerId, float serverTime, float reloadSeconds)
     {
         PlayerState state;
-        if (!TryGetActivePlayer(authenticatedPlayerId, out state)) return false;
-        if (reloading && (state.ammo >= 30 || state.reserveAmmo <= 0)) return false;
-        state.reloading = reloading;
+        if (!TryGetActivePlayer(authenticatedPlayerId, out state) || state.reloading ||
+            state.ammo >= state.magazineSize || state.reserveAmmo <= 0 || reloadSeconds <= 0f ||
+            serverTime < state.lastMoveTime) return false;
+        state.reloading = true;
+        state.reloadEndsAt = serverTime + reloadSeconds;
         return true;
+    }
+
+    public bool TryCompleteReload(string authenticatedPlayerId, float serverTime)
+    {
+        PlayerState state;
+        if (!TryGetActivePlayer(authenticatedPlayerId, out state) || !state.reloading ||
+            serverTime < state.reloadEndsAt) return false;
+        int loaded = Mathf.Min(state.magazineSize - state.ammo, state.reserveAmmo);
+        state.ammo += loaded;
+        state.reserveAmmo -= loaded;
+        state.reloading = false;
+        state.reloadEndsAt = 0f;
+        return loaded > 0;
     }
 
     public bool TryApplyServerDamage(string authenticatedPlayerId, int damage)
