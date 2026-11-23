@@ -66,7 +66,7 @@ public static class BRTrainingSceneBuilder
         GameObject disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         disc.name = "Safe Zone Visual";
         disc.transform.SetParent(zone.transform);
-        disc.transform.localPosition = new Vector3(0f, -0.92f, 0f);
+        disc.transform.localPosition = new Vector3(0f, 0.02f, 0f);
         disc.transform.localScale = new Vector3(360f, 0.025f, 360f);
         Collider discCollider = disc.GetComponent<Collider>();
         if (discCollider != null) Object.DestroyImmediate(discCollider);
