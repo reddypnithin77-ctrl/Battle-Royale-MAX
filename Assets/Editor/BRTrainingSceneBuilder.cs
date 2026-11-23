@@ -25,6 +25,7 @@ public static class BRTrainingSceneBuilder
 
         GameObject input = new GameObject("Mobile Input Bridge");
         input.AddComponent<MobileInputBridge>();
+        input.AddComponent<BRLandscapeMode>();
 
         GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         player.name = "Player";
