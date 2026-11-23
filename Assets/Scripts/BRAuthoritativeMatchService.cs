@@ -32,7 +32,9 @@ public class BRAuthoritativeMatchService
         float maximumSpeed = 5.5f, int magazineAmmo = 30, int reserveAmmo = 90, int health = 100, int magazineSize = 30)
     {
         if (string.IsNullOrWhiteSpace(authenticatedPlayerId) || players.ContainsKey(authenticatedPlayerId) ||
-            maximumSpeed <= 0f || magazineAmmo < 0 || reserveAmmo < 0 || health <= 0 || magazineSize <= 0 || magazineAmmo > magazineSize)
+            maximumSpeed <= 0f || !IsFinite(serverTime) || !IsFinite(maximumSpeed) ||
+            !IsFinite(spawnPosition.x) || !IsFinite(spawnPosition.y) || !IsFinite(spawnPosition.z) ||
+            magazineAmmo < 0 || reserveAmmo < 0 || health <= 0 || magazineSize <= 0 || magazineAmmo > magazineSize)
             return false;
 
         players.Add(authenticatedPlayerId, new PlayerState
@@ -76,7 +78,7 @@ public class BRAuthoritativeMatchService
         PlayerState state;
         if (!TryGetActivePlayer(authenticatedPlayerId, out state)) return false;
 
-        if (!BRServerValidationRules.IsShotValid(serverTime, state.lastShotTime,
+        if (serverTime < state.lastMoveTime || !BRServerValidationRules.IsShotValid(serverTime, state.lastShotTime,
             shotsPerSecond, state.ammo, state.reloading) ||
             !BRServerValidationRules.IsDamageValid(damage, maximumDamage))
         {
@@ -95,7 +97,7 @@ public class BRAuthoritativeMatchService
         PlayerState state;
         if (!TryGetActivePlayer(authenticatedPlayerId, out state)) return false;
 
-        if (!BRServerValidationRules.IsPickupValid(state.position, serverPickupPosition, pickupDistance) ||
+        if (ammoAmount <= 0 || !BRServerValidationRules.IsPickupValid(state.position, serverPickupPosition, pickupDistance) ||
             !BRServerValidationRules.IsResourceChangeValid(state.reserveAmmo, ammoAmount, maximumReserveAmmo))
         {
             Report(authenticatedPlayerId, "pickup", "Rejected invalid ammo pickup");
@@ -110,8 +112,9 @@ public class BRAuthoritativeMatchService
     {
         PlayerState state;
         if (!TryGetActivePlayer(authenticatedPlayerId, out state) || state.reloading ||
-            state.ammo >= state.magazineSize || state.reserveAmmo <= 0 || reloadSeconds <= 0f ||
-            serverTime < state.lastMoveTime) return false;
+            !IsFinite(serverTime) || !IsFinite(reloadSeconds) || state.ammo >= state.magazineSize ||
+            state.reserveAmmo <= 0 || reloadSeconds <= 0f || serverTime < state.lastMoveTime ||
+            !IsFinite(serverTime + reloadSeconds)) return false;
         state.reloading = true;
         state.reloadEndsAt = serverTime + reloadSeconds;
         return true;
@@ -121,7 +124,7 @@ public class BRAuthoritativeMatchService
     {
         PlayerState state;
         if (!TryGetActivePlayer(authenticatedPlayerId, out state) || !state.reloading ||
-            serverTime < state.reloadEndsAt) return false;
+            !IsFinite(serverTime) || serverTime < state.reloadEndsAt) return false;
         int loaded = Mathf.Min(state.magazineSize - state.ammo, state.reserveAmmo);
         state.ammo += loaded;
         state.reserveAmmo -= loaded;
@@ -164,6 +167,11 @@ public class BRAuthoritativeMatchService
         if (players.TryGetValue(playerId, out state) && !state.eliminated) return true;
         state = null;
         return false;
+    }
+
+    private static bool IsFinite(float value)
+    {
+        return !float.IsNaN(value) && !float.IsInfinity(value);
     }
 
     private void Report(string playerId, string rule, string detail)
