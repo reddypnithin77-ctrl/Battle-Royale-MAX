@@ -10,7 +10,7 @@ public static class BRTrainingSceneBuilder
     private const string ScenePath = "Assets/Scenes/TrainingArena.unity";
     private const string PrefabPath = "Assets/Prefabs/TrainingBot.prefab";
 
-    [MenuItem("Tools/Battle Royale/Build Training Scene")]
+    [MenuItem("Tools/INDIAN FIRE/Build World Scene")]
     public static void Build()
     {
         EnsureFolder("Assets/Scenes");
@@ -71,8 +71,8 @@ public static class BRTrainingSceneBuilder
         if (discCollider != null) Object.DestroyImmediate(discCollider);
         SafeZone safe = zone.AddComponent<SafeZone>();
         safe.visual = disc.transform;
-        safe.startRadius = 180f;
-        safe.endRadius = 35f;
+        safe.startRadius = 85f;
+        safe.endRadius = 18f;
         safe.startDelay = 45f;
         safe.shrinkDuration = 360f;
 
@@ -92,7 +92,7 @@ public static class BRTrainingSceneBuilder
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AssetDatabase.SaveAssets();
-        Debug.Log("Training scene created at " + ScenePath);
+        Debug.Log("INDIAN FIRE world scene created at " + ScenePath);
     }
 
     private static GameObject CreateBotPrefab()
@@ -168,7 +168,7 @@ public static class BRTrainingSceneBuilder
         label.fontSize = 34;
         label.alignment = TextAnchor.MiddleCenter;
         label.color = Color.white;
-        label.text = "PRACTICE MATCH";
+        label.text = "INDIAN FIRE";
         return label;
     }
 
