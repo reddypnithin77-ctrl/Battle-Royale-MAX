@@ -88,9 +88,11 @@ public static class BRServerValidationRuleChecks
             gotSnapshot && snapshotAmmo == 2 && snapshotReserve == 4 && !snapshotEliminated,
             true, ref passed, ref failed);
         Check("authoritative ammo pickup accepted",
-            match.TryCollectAmmo("test-player", new Vector3(2.5f, 0f, 0f), 2f, 3, 10), true, ref passed, ref failed);
+            match.TryCollectAmmo("test-player", "ammo-pickup-01", new Vector3(2.5f, 0f, 0f), 2f, 3, 10), true, ref passed, ref failed);
         Check("authoritative distant ammo pickup rejected",
-            match.TryCollectAmmo("test-player", new Vector3(50f, 0f, 0f), 2f, 3, 10), false, ref passed, ref failed);
+            match.TryCollectAmmo("test-player", "ammo-pickup-far", new Vector3(50f, 0f, 0f), 2f, 3, 10), false, ref passed, ref failed);
+        Check("same ammo pickup cannot be collected twice",
+            match.TryCollectAmmo("test-player", "ammo-pickup-01", new Vector3(2.5f, 0f, 0f), 2f, 3, 10), false, ref passed, ref failed);
         Check("authoritative damage applied",
             match.TryApplyServerDamage("test-player", 40), true, ref passed, ref failed);
         Check("authoritative player eliminated at zero health",
@@ -140,9 +142,16 @@ public static class BRServerValidationRuleChecks
         BRAuthoritativeMatchService hitMatch = new BRAuthoritativeMatchService(null);
         hitMatch.RegisterPlayer("attacker", Vector3.zero, 0f);
         hitMatch.RegisterPlayer("target", new Vector3(0f, 0f, 5f), 0f);
+        Check("attacker shot accepted before hit resolution",
+            hitMatch.TryFire("attacker", 1f, 5f, 25f, 40f), true, ref passed, ref failed);
         Check("server visible headshot applies damage",
             hitMatch.TryValidateAndApplyHit("attacker", "target", 1f, 25f, 40f, true, true),
             true, ref passed, ref failed);
+        Check("same shot cannot be resolved twice",
+            hitMatch.TryValidateAndApplyHit("attacker", "target", 1f, 25f, 40f, true, true),
+            false, ref passed, ref failed);
+        Check("second attacker shot accepted",
+            hitMatch.TryFire("attacker", 2f, 5f, 25f, 40f), true, ref passed, ref failed);
         Check("server wall-obstructed hit rejected",
             hitMatch.TryValidateAndApplyHit("attacker", "target", 2f, 25f, 40f, true, false),
             false, ref passed, ref failed);
