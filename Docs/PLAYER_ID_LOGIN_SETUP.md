@@ -59,3 +59,16 @@ The server creates the `player_profiles` table on startup. The ID is always take
 - This is an identity/profile starter, not a full game backend. It does not implement matchmaking, authoritative network simulation, persistent inventory, password reset, moderation, or account support tooling.
 - The Package Manager manifest now declares Authentication 2.7.2, but the repository still lacks ProjectSettings/ProjectVersion.txt and a complete Unity scene/build configuration. The project owner must choose the matching Unity Editor version and configure Android Build Support before an Android build can be verified.
 - Do not put Unity Service Account secrets, database credentials, or signing keys in the client APK.
+
+## Local Docker smoke-test setup
+
+The repository includes a local-only Docker setup:
+
+1. Install Docker with the Compose plugin.
+2. Copy `.env.example` to `.env`.
+3. Set `UNITY_PROJECT_ID` from your Unity Dashboard and replace the local database password placeholder.
+4. Run `docker compose up --build`.
+5. Open `http://127.0.0.1:8080/health`; it should report that PostgreSQL is connected.
+6. Stop with `docker compose down`. Only use `docker compose down -v` if you intend to delete the local database volume.
+
+The Compose file binds the API to localhost and disables PostgreSQL TLS only on the local Docker network. It is not a public production deployment. Production needs HTTPS ingress, a managed database with TLS and backups, secret management, distributed rate limiting, monitoring, and restricted database access. Never commit the real `.env` file.
