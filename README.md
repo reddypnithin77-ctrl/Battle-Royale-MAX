@@ -60,3 +60,5 @@ Unity Editor and Android Build Support are required on a Windows, macOS, or Linu
 - In-memory server-owned player position, health, ammo, reload timing, and elimination state.
 - Server-side movement, firing, and pickup validation before accepting state changes.
 - Integration notes: [Authoritative match service](Docs/AUTHORITATIVE_MATCH_SERVICE.md).
+
+- Expanded anti-cheat runner: 36 local checks for validation rules and authoritative match-state behavior. See [Anti-Cheat Tests](Docs/ANTI_CHEAT_TESTS.md).
