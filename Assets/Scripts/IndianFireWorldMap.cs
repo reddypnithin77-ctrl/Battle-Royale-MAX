@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Original fictional India-inspired battle-royale world for INDIAN FIRE.
+// The full mainland silhouette includes the Northeast extension and southern peninsula.
 // All structures and place names are procedural placeholders, not copied game assets.
 public class IndianFireWorldMap : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class IndianFireWorldMap : MonoBehaviour
     {
         new Vector2(-0.18f, 0.98f), new Vector2(0.12f, 0.94f),
         new Vector2(0.31f, 0.82f), new Vector2(0.43f, 0.66f),
+        // Full Northeast extension: eastern corridor and the seven-sister region.
+        new Vector2(0.56f, 0.73f), new Vector2(0.72f, 0.82f),
+        new Vector2(0.96f, 0.78f), new Vector2(0.91f, 0.64f),
+        new Vector2(0.78f, 0.57f), new Vector2(0.64f, 0.48f),
         new Vector2(0.57f, 0.53f), new Vector2(0.62f, 0.34f),
         new Vector2(0.53f, 0.16f), new Vector2(0.43f, -0.02f),
         new Vector2(0.28f, -0.22f), new Vector2(0.15f, -0.49f),
@@ -45,6 +50,8 @@ public class IndianFireWorldMap : MonoBehaviour
         new Landmark("LIONGATE PORT", -0.43f, -0.12f, new Color(0.78f, 0.67f, 0.43f)),
         new Landmark("FOUR ARCH BAZAAR", 0.16f, 0.02f, new Color(0.83f, 0.61f, 0.38f)),
         new Landmark("RIVER CROWN", 0.34f, 0.48f, new Color(0.58f, 0.76f, 0.78f)),
+        new Landmark("BRAHMAPUTRA FRONTIER", 0.72f, 0.67f, new Color(0.48f, 0.72f, 0.76f)),
+        new Landmark("EASTERN HIGHLANDS", 0.70f, 0.82f, new Color(0.61f, 0.73f, 0.58f)),
         new Landmark("GOLDEN SANCTUARY", -0.26f, 0.72f, new Color(0.92f, 0.78f, 0.36f)),
         new Landmark("SUNSPIRE COAST", 0.49f, -0.12f, new Color(0.91f, 0.72f, 0.42f)),
         new Landmark("TECH VALLEY", 0.06f, -0.36f, new Color(0.42f, 0.75f, 0.69f)),
