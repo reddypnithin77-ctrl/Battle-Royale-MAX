@@ -15,7 +15,16 @@ public class MobileInputBridge : MonoBehaviour
         Instance = this;
     }
 
-    public void SetMove(Vector2 value) => Move = Vector2.ClampMagnitude(value, 1f);
+    public void SetMove(Vector2 value)
+    {
+        if (float.IsNaN(value.x) || float.IsInfinity(value.x) ||
+            float.IsNaN(value.y) || float.IsInfinity(value.y))
+        {
+            Move = Vector2.zero;
+            return;
+        }
+        Move = Vector2.ClampMagnitude(value, 1f);
+    }
     public void SetFire(bool held) => FireHeld = held;
     public void PressJump() => JumpPressed = true;
 
