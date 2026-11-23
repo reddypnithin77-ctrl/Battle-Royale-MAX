@@ -2,7 +2,8 @@
 
 ## Implemented
 
-- `Assets/Integrations/UnityAuthentication/BRUnityAuthenticationClient.cs`: optional Unity Authentication guest sign-in adapter.
+- `Assets/Integrations/UnityAuthentication/BRUnityAuthenticationClient.cs`: Unity Authentication guest sign-in, username/password sign-up and sign-in, linking username/password to a guest account, and backend verification before the game receives an authenticated player ID.
+- `Packages/manifest.json`: pins the Unity Authentication package to version 2.7.2 or later-compatible API baseline.
 - `Server/src/server.js`: verifies Unity-signed access tokens using Unity's published JWKS, checks issuer, RS256 signature, expiry and configured project ID, and derives identity only from the verified `sub` claim.
 - PostgreSQL-backed player profile records are created/updated after successful token verification.
 - A basic per-process IP rate limit protects the verification endpoint.
@@ -53,8 +54,8 @@ The server creates the `player_profiles` table on startup. The ID is always take
 
 ## Important limitations
 
-- The included sign-in is guest sign-in only. A recoverable external account provider is not yet linked.
+- Username/password sign-up, sign-in, and linking are implemented in the Unity adapter but require the owner to enable the provider in Unity Dashboard and wire actual scene UI. Password reset/support is not implemented.
 - The in-process rate limiter resets when the service restarts and is not shared between multiple instances. Use gateway-level or shared-store rate limiting for public production traffic.
 - This is an identity/profile starter, not a full game backend. It does not implement matchmaking, authoritative network simulation, persistent inventory, password reset, moderation, or account support tooling.
-- Unity project metadata and Package Manager manifest are absent from this repository snapshot. Unity Editor version and packages must be selected and configured by the project owner before an Android build can be verified.
+- The Package Manager manifest now declares Authentication 2.7.2, but the repository still lacks ProjectSettings/ProjectVersion.txt and a complete Unity scene/build configuration. The project owner must choose the matching Unity Editor version and configure Android Build Support before an Android build can be verified.
 - Do not put Unity Service Account secrets, database credentials, or signing keys in the client APK.
