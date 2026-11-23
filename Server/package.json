@@ -1,0 +1,8 @@
+{
+  "name": "battle-royale-max-auth-verifier",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node src/server.js" },
+  "dependencies": { "jose": "^6.0.11" }
+}
