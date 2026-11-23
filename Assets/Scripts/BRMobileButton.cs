@@ -45,7 +45,8 @@ public class BRMobileButton : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     private BRHitscanWeapon GetActiveWeapon()
     {
-        if (loadout != null && loadout.weaponSlots != null && loadout.weaponSlots.Length > loadout.ActiveSlot)
+        if (loadout != null && loadout.weaponSlots != null && loadout.ActiveSlot >= 0 &&
+            loadout.weaponSlots.Length > loadout.ActiveSlot && loadout.weaponSlots[loadout.ActiveSlot] != null)
             return loadout.weaponSlots[loadout.ActiveSlot].GetComponentInChildren<BRHitscanWeapon>();
         return GetComponentInParent<BRHitscanWeapon>();
     }
