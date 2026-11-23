@@ -36,3 +36,9 @@ Read [Unity Android setup](Docs/UNITY_ANDROID_STARTER.md) and [project roadmap](
 
 ## Build note
 Unity Editor and Android Build Support are required on a Windows, macOS, or Linux computer to assemble and build the Android app. Use only original or properly licensed assets.
+
+
+## Generate a playable Unity training scene
+- Unity Editor menu: **Tools → Battle Royale → Build Training Scene**.
+- Creates a local arena, player, third-person camera, placeholder weapon, pickups, safe-zone visual, bot prefab, and practice-match HUD.
+- Guide: [Build the training scene](Docs/BUILD_TRAINING_SCENE.md).
