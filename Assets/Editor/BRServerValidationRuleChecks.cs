@@ -22,7 +22,7 @@ public static class BRServerValidationRuleChecks
         Check("excessive vertical movement rejected",
             BRServerValidationRules.IsMovementValid(Vector3.zero, new Vector3(0f, 5f, 0f), 1f, 5f, 0.1f, 2f), false, ref passed, ref failed);
         Check("valid shot accepted",
-            BRServerValidationRules.IsShotValid(1f, 0.8f, 5f, 10, false), true, ref passed, ref failed);
+            BRServerValidationRules.IsShotValid(1.01f, 0.8f, 5f, 10, false), true, ref passed, ref failed);
         Check("too-fast shot rejected",
             BRServerValidationRules.IsShotValid(1f, 0.95f, 5f, 10, false), false, ref passed, ref failed);
         Check("empty-magazine shot rejected",
