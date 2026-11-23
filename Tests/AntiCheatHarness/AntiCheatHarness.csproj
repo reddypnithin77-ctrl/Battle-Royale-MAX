@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DefineConstants>UNITY_EDITOR</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Scripts/BRServerValidationRules.cs" Link="BRServerValidationRules.cs" />
+    <Compile Include="../../Assets/Scripts/BRAuthoritativeMatchService.cs" Link="BRAuthoritativeMatchService.cs" />
+    <Compile Include="../../Assets/Editor/BRServerValidationRuleChecks.cs" Link="BRServerValidationRuleChecks.cs" />
+  </ItemGroup>
+</Project>
