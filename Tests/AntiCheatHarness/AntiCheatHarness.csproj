@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Assets/Scripts/BRServerValidationRules.cs" Link="BRServerValidationRules.cs" />
+    <Compile Include="../../Assets/Scripts/BRHeadshotAnomalyMonitor.cs" Link="BRHeadshotAnomalyMonitor.cs" />
     <Compile Include="../../Assets/Scripts/BRAuthoritativeMatchService.cs" Link="BRAuthoritativeMatchService.cs" />
     <Compile Include="../../Assets/Editor/BRServerValidationRuleChecks.cs" Link="BRServerValidationRuleChecks.cs" />
   </ItemGroup>
