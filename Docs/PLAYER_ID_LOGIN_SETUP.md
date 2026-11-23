@@ -1,74 +1,51 @@
-# Player identity and login integration
+# Firebase Authentication setup
 
-## Implemented
+The game now uses Firebase Authentication email/password accounts. The old Unity Authentication adapter remains in the repository for reference but is not used by this Firebase flow.
 
-- `Assets/Integrations/UnityAuthentication/BRUnityAuthenticationClient.cs`: Unity Authentication guest sign-in, username/password sign-up and sign-in, linking username/password to a guest account, and backend verification before the game receives an authenticated player ID.
-- `Packages/manifest.json`: pins the Unity Authentication package to version 2.7.2 or later-compatible API baseline.
-- `Server/src/server.js`: verifies Unity-signed access tokens using Unity's published JWKS, checks issuer, RS256 signature, expiry and configured project ID, and derives identity only from the verified `sub` claim.
-- PostgreSQL-backed player profile records are created/updated after successful token verification.
-- A basic per-process IP rate limit protects the verification endpoint.
-- The Unity adapter is compile-gated until Unity Services packages and the scripting define are configured.
+## 1. Firebase Console
 
-## Unity project setup (you must do this in your Unity account)
+1. Open https://console.firebase.google.com/ and select your Firebase project.
+2. Open **Authentication → Sign-in method** (or **Sign-in providers**).
+3. Enable **Email/Password**, then save.
+4. In **Project settings → General**, register an Android app using the exact Android application ID from Unity Player Settings.
+5. Download `google-services.json` and place it directly inside the Unity project's `Assets/` folder.
+6. Download the Firebase Unity SDK from the official setup guide and import `FirebaseAuth.unitypackage` into Unity. Import the SDK's required dependency resolver if prompted.
 
-1. Open the project in a supported Unity Editor.
-2. Install **Authentication** and **Services Core** using Package Manager.
-3. Link the Unity project to your Unity Dashboard project and configure Authentication.
-4. Add `BR_UNITY_AUTHENTICATION` to Player Settings > Other Settings > Scripting Define Symbols for the target platform.
-5. Add `BRUnityAuthenticationClient` to a scene object and subscribe to its `Authenticated` and `SignInFailed` events.
-6. Send the access token from the `Authenticated` event to your deployed backend over HTTPS in an `Authorization: Bearer <token>` header. Do not save or log the token.
+Official setup: https://firebase.google.com/docs/unity/setup
+Email/password guide: https://firebase.google.com/docs/auth/unity/password-auth
 
-The included method creates an anonymous guest account. Guest identity is not a recoverable account by itself. To support account recovery and sign-in on a second device, enable a supported external identity provider in the Unity Dashboard and implement the matching provider SDK/token-linking flow. Do not advertise account recovery until that flow has been configured and tested. Do not send provider passwords or tokens to anyone.
+## 2. Unity client
 
-## Backend configuration
+1. Add `BR_FIREBASE_AUTHENTICATION` to Player Settings → Other Settings → Scripting Define Symbols.
+2. Add `BRFirebaseAuthenticationClient` to a scene object.
+3. Set Verification Endpoint to your deployed HTTPS URL ending in `/auth/firebase/verify`.
+4. Wire your Sign Up UI to `SignUp(email, password)`, Sign In UI to `SignIn(email, password)`, and Forgot Password UI to `SendPasswordReset(email)`.
+5. Subscribe to `Authenticated` and `SignInFailed`. Enter the game only after the `Authenticated` event fires.
 
-Requirements: Node.js 20+, PostgreSQL 14+, and HTTPS at the public edge.
+Firebase Auth in this implementation uses email/password, not a separate username. Never log or store passwords or ID tokens in the client.
 
-Environment variables:
-- `PORT`: optional, defaults to 8080.
-- `UNITY_PROJECT_ID`: required; exact project ID from the Unity Dashboard.
-- `DATABASE_URL`: required PostgreSQL connection string. Store it as a hosting secret, never in source control or the Unity client.
-- `PGSSLMODE=disable`: local development only. Production should use TLS with a trusted database certificate.
+## 3. Backend identity verification
 
-Run locally from `Server/`:
+The backend verifies Firebase ID tokens with Firebase Admin SDK and derives the player ID from the verified UID. It stores a basic player profile in PostgreSQL. The client cannot choose its player ID.
 
-```sh
-npm install
-UNITY_PROJECT_ID="your-unity-project-id" DATABASE_URL="postgresql://..." npm start
-```
+Required environment variables:
+- `FIREBASE_PROJECT_ID`: exact Firebase project ID.
+- `DATABASE_URL`: private PostgreSQL connection string.
+- `GOOGLE_APPLICATION_CREDENTIALS`: path to a Firebase service-account credential file for local development only.
 
-Endpoints:
-- `GET /health`: checks database connectivity.
-- `POST /auth/verify`: requires a Unity access token in the Authorization header. It creates or updates a profile row and returns the verified player ID plus timestamps.
-
-The server creates the `player_profiles` table on startup. The ID is always taken from the verified token's `sub` claim; no client-supplied player ID is trusted.
-
-## Deployment checklist
-
-1. Create a private PostgreSQL database with automated backups.
-2. Deploy the `Server/` directory to a Node.js 20+ host.
-3. Set `UNITY_PROJECT_ID`, `DATABASE_URL`, and `PORT` as host environment variables/secrets.
-4. Require HTTPS and configure the host's health check to use `/health`.
-5. Configure platform-level rate limiting, request logging without authorization headers, alerts, and database backups.
-6. Test invalid, expired, wrong-project, and valid Unity tokens before enabling the endpoint in the game client.
-
-## Important limitations
-
-- Username/password sign-up, sign-in, and linking are implemented in the Unity adapter but require the owner to enable the provider in Unity Dashboard and wire actual scene UI. Password reset/support is not implemented.
-- The in-process rate limiter resets when the service restarts and is not shared between multiple instances. Use gateway-level or shared-store rate limiting for public production traffic.
-- This is an identity/profile starter, not a full game backend. It does not implement matchmaking, authoritative network simulation, persistent inventory, password reset, moderation, or account support tooling.
-- The Package Manager manifest now declares Authentication 2.7.2, but the repository still lacks ProjectSettings/ProjectVersion.txt and a complete Unity scene/build configuration. The project owner must choose the matching Unity Editor version and configure Android Build Support before an Android build can be verified.
-- Do not put Unity Service Account secrets, database credentials, or signing keys in the client APK.
-
-## Local Docker smoke-test setup
-
-The repository includes a local-only Docker setup:
-
-1. Install Docker with the Compose plugin.
-2. Copy `.env.example` to `.env`.
-3. Set `UNITY_PROJECT_ID` from your Unity Dashboard and replace the local database password placeholder.
+For local Docker:
+1. Create a Firebase service-account credential for server-side use in Firebase/Google Cloud project settings. Keep it private.
+2. Put the JSON file in a local `secrets/` folder, which is ignored by Git; never upload it to GitHub or include it in the APK.
+3. Copy `.env.example` to `.env`, set the Firebase project ID, service-account file path, and a strong local database password.
 4. Run `docker compose up --build`.
-5. Open `http://127.0.0.1:8080/health`; it should report that PostgreSQL is connected.
-6. Stop with `docker compose down`. Only use `docker compose down -v` if you intend to delete the local database volume.
+5. Check `http://127.0.0.1:8080/health`.
+6. Stop with `docker compose down`.
 
-The Compose file binds the API to localhost and disables PostgreSQL TLS only on the local Docker network. It is not a public production deployment. Production needs HTTPS ingress, a managed database with TLS and backups, secret management, distributed rate limiting, monitoring, and restricted database access. Never commit the real `.env` file.
+Production must use a managed secret mechanism or workload identity instead of a downloaded service-account key, HTTPS ingress, managed PostgreSQL with TLS/backups, distributed rate limiting, monitoring, and restricted database access. The included Compose setup is local development only.
+
+## 4. Important limitations
+
+- Firebase SDK import, Unity scene wiring, and Android build still require the Unity Editor and your local project.
+- Firebase service-account credentials and database credentials must never be placed in the client, APK, or Git repository.
+- This is an authentication/profile foundation, not a full multiplayer backend. It does not implement matchmaking, persistent inventory, passwordless recovery support, moderation, or authoritative gameplay.
+- The previous Unity Authentication verifier endpoint has been replaced by the Firebase endpoint. Do not use the old `BRUnityAuthenticationClient` for this flow.
