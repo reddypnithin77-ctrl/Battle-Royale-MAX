@@ -3,18 +3,25 @@
 An original battle-royale project. It is **not Free Fire MAX** and does not use Garena assets, characters, maps, branding, or proprietary code.
 
 ## Browser prototype
-A small **single-player browser prototype** lives in `docs/index.html`. It demonstrates movement, mouse aiming, firing at training bots, health, and a shrinking safe zone. It is not a full 3D game and does not connect real players.
+A small single-player browser prototype lives in `docs/index.html`. It demonstrates movement, aiming, firing at training bots, health, and a shrinking safe zone. It is not a full 3D game and does not connect real players.
 
-After enabling GitHub Pages under **Settings → Pages → Build and deployment → GitHub Actions**, the workflow deploys it at:
-`https://reddypnithin77-ctrl.github.io/Battle-Royale-MAX/`
+GitHub Pages: https://reddypnithin77-ctrl.github.io/Battle-Royale-MAX/
 
 ## Unity Android starter
-`Assets/Scripts` contains the initial Unity C# controller, camera, health and safe-zone scripts. See [Unity setup](Assets/Scripts/README.md) and [roadmap](Docs/ROADMAP.md). This is not an Android APK.
+The `Assets/Scripts` folder now includes starter components for:
+- Mobile input bridge (virtual joystick values, fire, jump, and right-side touch look)
+- Third-person character movement and follow camera
+- Raycast weapon and target health
+- Safe-zone shrinking and outside-zone damage
+- Collectible health pickups
 
-## Not implemented yet
-- Production 3D assets and full Android touch controls
-- Real online matchmaking, networking, accounts, or 50-player dedicated servers
-- Release signing, anti-cheat, moderation, or production backend
+Read [Unity Android setup](Docs/UNITY_ANDROID_STARTER.md) and [project roadmap](Docs/ROADMAP.md). These scripts are a foundation, not a complete game or installable APK.
 
-## Run locally
-Open `docs/index.html` in a modern browser. Desktop: WASD/arrow keys to move, mouse to aim, click or Space to fire. Mobile: drag to move and tap to fire.
+## Still required
+- A Unity scene, original 3D player/map/weapon assets, animations, and UI prefabs
+- Loot/inventory, vehicles, parachute, bots and match flow
+- Multiplayer networking, matchmaking, authoritative servers, moderation and security
+- Device testing, performance optimization, Android signing and release packaging
+
+## Build note
+Unity Editor and Android Build Support are required on a Windows, macOS, or Linux computer to assemble and build the Android app. Use only original or properly licensed assets.
