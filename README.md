@@ -11,9 +11,9 @@ GitHub Pages: https://reddypnithin77-ctrl.github.io/Battle-Royale-MAX/
 The `Assets/Scripts` folder includes starter components for mobile input, third-person movement/camera, raycast weapons, health, safe zones, pickups, loot, bots, and match flow. Read [Unity Android setup](Docs/UNITY_ANDROID_STARTER.md).
 
 ## INDIAN FIRE world
-The procedural world builder creates an original India-inspired island with named districts, simple enterable greybox buildings, connecting roads, loot-area labels, health supplies, and ammo supplies. The structures are prototype geometry intended to be replaced with optimized original art.
+The procedural world builder creates a full, stylized India-shaped mainland layout, including the Northeast extension and southern peninsula, with named districts, simple enterable greybox buildings, connecting roads, loot-area labels, health supplies, and ammo supplies. The structures are prototype geometry intended to be replaced with optimized original art.
 
-Named districts include Snowcrest Gate, Victory Arch, Moonstone Palace, Liongate Port, Four Arch Bazaar, River Crown, Golden Sanctuary, Sunspire Coast, Tech Valley, Lotus Reach, and Backwater Haven.
+Named districts include Snowcrest Gate, Victory Arch, Moonstone Palace, Liongate Port, Four Arch Bazaar, River Crown, Golden Sanctuary, Brahmaputra Frontier, Eastern Highlands, Sunspire Coast, Tech Valley, Lotus Reach, and Backwater Haven.
 
 ## Generate a playable Unity scene
 1. Open the project in Unity Editor.
