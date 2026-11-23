@@ -32,6 +32,11 @@ function isRateLimited(ip, now = Date.now()) {
     return false;
   }
   current.count += 1;
+  if (ipWindows.size > 10000) {
+    for (const [key, value] of ipWindows) {
+      if (now - value.start >= WINDOW_MS) ipWindows.delete(key);
+    }
+  }
   return current.count > RATE_LIMIT;
 }
 
@@ -136,4 +141,43 @@ async function shutdown() {
   process.exit(0);
 }
 process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
+process.on("SIGINT", shutdown);  let payload;
+  try {
+    const verified = await jwtVerify(match[1], JWKS, {
+      issuer: ISSUER,
+      algorithms: ["RS256"],
+    });
+    payload = verified.payload;
+  } catch {
+    send(response, 401, { error: "invalid_or_expired_token" });
+    return;
+  }
+
+  if (typeof payload.sub !== "string" || payload.sub.length === 0 ||
+      payload.project_id !== EXPECTED_PROJECT_ID) {
+    send(response, 401, { error: "invalid_identity_claims" });
+    return;
+  }
+
+  try {
+    // Identity is taken only from the verified token; the client cannot choose a profile ID.
+    const result = await pool.query(
+      `INSERT INTO player_profiles (player_id)
+       VALUES ($1)
+       ON CONFLICT (player_id)
+       DO UPDATE SET last_seen_at = NOW()
+       RETURNING player_id, created_at, last_seen_at`,
+      [payload.sub]
+    );
+
+    send(response, 200, {
+      authenticated: true,
+      player: {
+        playerId: result.rows[0].player_id,
+        createdAt: result.rows[0].created_at,
+        lastSeenAt: result.rows[0].last_seen_at,
+      },
+    });
+  } catch {
+    send(response, 503, { error: "profile_storage_unavailable" });
+  }
