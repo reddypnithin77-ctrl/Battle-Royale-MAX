@@ -8,57 +8,23 @@ A small single-player browser prototype lives in `docs/index.html`. It demonstra
 GitHub Pages: https://reddypnithin77-ctrl.github.io/Battle-Royale-MAX/
 
 ## Unity Android starter
-The `Assets/Scripts` folder now includes starter components for:
-- Mobile input bridge (virtual joystick values, fire, jump, and right-side touch look)
-- Third-person character movement and follow camera
-- Raycast weapon and target health
-- Safe-zone shrinking and outside-zone damage
-- Collectible health pickups
+The `Assets/Scripts` folder includes starter components for mobile input, third-person movement/camera, raycast weapons, health, safe zones, pickups, loot, bots, and match flow. Read [Unity Android setup](Docs/UNITY_ANDROID_STARTER.md).
 
-Read [Unity Android setup](Docs/UNITY_ANDROID_STARTER.md) and [project roadmap](Docs/ROADMAP.md). These scripts are a foundation, not a complete game or installable APK.
-
-## Latest gameplay additions
+## Gameplay systems
 - Mobile virtual joystick and touch buttons for fire, jump, reload, and weapon switching.
-- Weapon loadout slots and weapon pickups.
-- Weighted loot spawning at hand-placed map points, with respawn after pickup.
-- Setup notes: [Mobile HUD and loot guide](Docs/MOBILE_HUD_AND_LOOT.md).
-
-## Practice match stage
-- Local bot spawning from configured scene points.
-- Countdown and practice-round status: training complete or player eliminated.
-- Setup guide: [Practice match setup](Docs/PRACTICE_MATCH_SETUP.md).
-
-## Still required
-- A Unity scene, original 3D player/map/weapon assets, animations, and UI prefabs
-- Loot/inventory, vehicles, parachute, bots and match flow
-- Multiplayer networking, matchmaking, authoritative servers, moderation and security
-- Device testing, performance optimization, Android signing and release packaging
-
-## Build note
-Unity Editor and Android Build Support are required on a Windows, macOS, or Linux computer to assemble and build the Android app. Use only original or properly licensed assets.
-
+- Weapon loadout slots, pickups, ammo, and weighted loot spawning.
+- Local training arena, bot spawning, and practice-round flow.
+- Original physics upgrade: accelerated movement, sprint/crouch, weapon recoil/spread, and an arcade Rigidbody vehicle controller. See [Original gameplay physics](Docs/ORIGINAL_GAMEPLAY_PHYSICS.md).
+- Anti-cheat validation foundation and an in-memory authoritative match-state example. See [Anti-cheat foundation](Docs/ANTI_CHEAT_FOUNDATION.md) and [authoritative match service](Docs/AUTHORITATIVE_MATCH_SERVICE.md).
 
 ## Generate a playable Unity training scene
-- Unity Editor menu: **Tools → Battle Royale → Build Training Scene**.
-- Creates a local arena, player, third-person camera, placeholder weapon, pickups, safe-zone visual, bot prefab, and practice-match HUD.
-- Guide: [Build the training scene](Docs/BUILD_TRAINING_SCENE.md).
+Unity Editor menu: **Tools → Battle Royale → Build Training Scene**. See [Build the training scene](Docs/BUILD_TRAINING_SCENE.md).
 
+## Still required
+- Original 3D player, map, vehicle, and weapon assets, animations, sounds, and UI prefabs
+- Proper vehicle suspension and tuning, more advanced movement/animation integration
+- Real multiplayer networking, matchmaking, authoritative servers, moderation, and security
+- Unity compilation, device testing, performance optimization, Android signing, and release packaging
 
-## Anti-cheat foundation
-- Reusable server-side validation for movement, firing cadence, ammo/reload state, damage, pickups, and resource bounds.
-- Structured audit events for suspicious actions.
-- Guide: [Anti-cheat foundation](Docs/ANTI_CHEAT_FOUNDATION.md).
-
-
-## Anti-cheat rule checks
-- Unity Editor menu: **Tools → Battle Royale → Run Anti-Cheat Rule Checks**.
-- Prints PASS/FAIL results for movement, fire cadence, ammo/reload, damage, pickup distance, and resource bounds.
-- Guide: [Anti-cheat tests](Docs/ANTI_CHEAT_TESTS.md).
-
-
-## Authoritative match-state example
-- In-memory server-owned player position, health, ammo, reload timing, and elimination state.
-- Server-side movement, firing, and pickup validation before accepting state changes.
-- Integration notes: [Authoritative match service](Docs/AUTHORITATIVE_MATCH_SERVICE.md).
-
-- Expanded anti-cheat runner: 36 local checks for validation rules and authoritative match-state behavior. See [Anti-Cheat Tests](Docs/ANTI_CHEAT_TESTS.md).
+## Build note
+Unity Editor and Android Build Support are required on a Windows, macOS, or Linux computer to assemble and build the Android app. The source scripts are not a finished APK and must be tested in Unity. Use only original or properly licensed assets.
