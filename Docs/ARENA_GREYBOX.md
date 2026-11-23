@@ -1,6 +1,6 @@
 # INDIAN FIRE world map
 
-The procedural scene builder creates an original, stylized India-inspired island. This is a fictional game world, not a precise geographic or navigational representation.
+The procedural scene builder creates an original, stylized India-shaped mainland layout. This is a fictional game world, includes the northern region, western and eastern mainland, Northeast extension, and full southern peninsula; it is not a precise geographic or navigational representation.
 
 ## Districts
 
@@ -10,6 +10,8 @@ The procedural scene builder creates an original, stylized India-inspired island
 - Liongate Port — western coastal district
 - Four Arch Bazaar — old-city market district
 - River Crown — eastern river-region district
+- Brahmaputra Frontier — Northeast river-region district
+- Eastern Highlands — Northeast highland district
 - Golden Sanctuary — northwestern heritage-inspired district
 - Sunspire Coast — eastern coastal district
 - Tech Valley — southern technology district
@@ -20,8 +22,8 @@ All place names and structures are original. The layout does not reproduce a rea
 
 ## What the greybox generator adds
 
-- A stylized island outline with terrain tiles and surrounding ocean
-- Simple connecting roads between parts of the island
+- A full stylized mainland India outline with terrain tiles and surrounding ocean, including the Northeast extension and southern peninsula
+- Simple connecting roads between mainland districts
 - Three basic enterable greybox buildings around each named district: a market house, storehouse, and residence
 - A landmark plaza and district label
 - Health and ammo pickup examples in each district
