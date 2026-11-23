@@ -48,3 +48,9 @@ Unity Editor and Android Build Support are required on a Windows, macOS, or Linu
 - Reusable server-side validation for movement, firing cadence, ammo/reload state, damage, pickups, and resource bounds.
 - Structured audit events for suspicious actions.
 - Guide: [Anti-cheat foundation](Docs/ANTI_CHEAT_FOUNDATION.md).
+
+
+## Anti-cheat rule checks
+- Unity Editor menu: **Tools → Battle Royale → Run Anti-Cheat Rule Checks**.
+- Prints PASS/FAIL results for movement, fire cadence, ammo/reload, damage, pickup distance, and resource bounds.
+- Guide: [Anti-cheat tests](Docs/ANTI_CHEAT_TESTS.md).
