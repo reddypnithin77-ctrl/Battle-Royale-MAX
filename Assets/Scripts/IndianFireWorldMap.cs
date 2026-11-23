@@ -92,7 +92,7 @@ public class IndianFireWorldMap : MonoBehaviour
                         ? new Color(0.60f, 0.48f, 0.31f)
                         : new Color(0.43f, 0.53f, 0.34f);
 
-            CreateBlock("India Terrain Tile", new Vector3(px, -0.85f, pz),
+            CreateBlock("India Terrain Tile", new Vector3(px, -0.5f, pz),
                 new Vector3(TileSize + 0.15f, 1f, TileSize + 0.15f), terrain);
         }
 
