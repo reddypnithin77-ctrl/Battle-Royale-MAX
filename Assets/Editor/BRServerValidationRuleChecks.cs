@@ -39,6 +39,60 @@ public static class BRServerValidationRuleChecks
         Check("negative resource total rejected",
             BRServerValidationRules.IsResourceChangeValid(2, -3, 10), false, ref passed, ref failed);
 
+
+        Check("NaN movement rejected",
+            BRServerValidationRules.IsMovementValid(Vector3.zero, new Vector3(float.NaN, 0f, 0f), 1f, 5f, 0.1f, 2f), false, ref passed, ref failed);
+        Check("infinite movement speed rejected",
+            BRServerValidationRules.IsMovementValid(Vector3.zero, Vector3.one, 1f, float.PositiveInfinity, 0.1f, 2f), false, ref passed, ref failed);
+        Check("negative movement tolerance rejected",
+            BRServerValidationRules.IsMovementValid(Vector3.zero, Vector3.one, 1f, 5f, -1f, 2f), false, ref passed, ref failed);
+        Check("backwards shot timestamp rejected",
+            BRServerValidationRules.IsShotValid(0.5f, 1f, 5f, 10, false), false, ref passed, ref failed);
+        Check("NaN damage rejected",
+            BRServerValidationRules.IsDamageValid(float.NaN, 30f), false, ref passed, ref failed);
+        Check("infinite pickup distance rejected",
+            BRServerValidationRules.IsPickupValid(Vector3.zero, Vector3.one, float.PositiveInfinity), false, ref passed, ref failed);
+
+        BRAuthoritativeMatchService match = new BRAuthoritativeMatchService(null);
+        Check("server player registration accepted",
+            match.RegisterPlayer("test-player", Vector3.zero, 0f, 5f, 2, 5, 100, 2), true, ref passed, ref failed);
+        Check("duplicate player registration rejected",
+            match.RegisterPlayer("test-player", Vector3.zero, 0f), false, ref passed, ref failed);
+        Check("authoritative valid movement accepted",
+            match.TryMove("test-player", new Vector3(2f, 0f, 0f), 1f), true, ref passed, ref failed);
+        Check("authoritative excessive movement rejected",
+            match.TryMove("test-player", new Vector3(20f, 0f, 0f), 1.1f), false, ref passed, ref failed);
+        Check("authoritative shot accepted",
+            match.TryFire("test-player", 1f, 5f, 20f, 30f), true, ref passed, ref failed);
+        Check("authoritative rapid repeat shot rejected",
+            match.TryFire("test-player", 1.05f, 5f, 20f, 30f), false, ref passed, ref failed);
+        Check("authoritative reload started",
+            match.TryBeginReload("test-player", 1.1f, 1f), true, ref passed, ref failed);
+        Check("authoritative fire blocked during reload",
+            match.TryFire("test-player", 1.2f, 5f, 20f, 30f), false, ref passed, ref failed);
+        Check("reload cannot finish early",
+            match.TryCompleteReload("test-player", 2f), false, ref passed, ref failed);
+        Check("reload completes at server deadline",
+            match.TryCompleteReload("test-player", 2.1f), true, ref passed, ref failed);
+        Vector3 snapshotPosition;
+        int snapshotHealth, snapshotAmmo, snapshotReserve;
+        bool snapshotEliminated;
+        bool gotSnapshot = match.TryGetSnapshot("test-player", out snapshotPosition, out snapshotHealth,
+            out snapshotAmmo, out snapshotReserve, out snapshotEliminated);
+        Check("snapshot reflects server reload",
+            gotSnapshot && snapshotAmmo == 2 && snapshotReserve == 4 && !snapshotEliminated,
+            true, ref passed, ref failed);
+        Check("authoritative ammo pickup accepted",
+            match.TryCollectAmmo("test-player", new Vector3(2.5f, 0f, 0f), 2f, 3, 10), true, ref passed, ref failed);
+        Check("authoritative distant ammo pickup rejected",
+            match.TryCollectAmmo("test-player", new Vector3(50f, 0f, 0f), 2f, 3, 10), false, ref passed, ref failed);
+        Check("authoritative damage applied",
+            match.TryApplyServerDamage("test-player", 40), true, ref passed, ref failed);
+        Check("authoritative player eliminated at zero health",
+            match.TryApplyServerDamage("test-player", 100), true, ref passed, ref failed);
+        Check("eliminated player cannot move",
+            match.TryMove("test-player", new Vector3(2f, 0f, 0f), 3f), false, ref passed, ref failed);
+
         string summary = "Anti-cheat rule checks: " + passed + " passed, " + failed + " failed.";
         if (failed == 0) Debug.Log("<color=green>" + summary + "</color>");
         else Debug.LogError(summary);
