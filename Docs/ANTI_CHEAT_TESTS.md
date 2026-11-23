@@ -1,11 +1,25 @@
 # Anti-cheat rule check runner
 
-A small Unity Editor validation harness is included for the deterministic rule helpers.
+A Unity Editor validation harness checks the deterministic validation rules and the in-memory authoritative match service.
 
-1. Open the Unity project and wait for compilation.
+## Run it
+
+1. Open the Unity project in Unity Editor and wait for scripts to compile.
 2. Choose **Tools → Battle Royale → Run Anti-Cheat Rule Checks**.
-3. Open the Console window and review the PASS/FAIL entries and summary.
+3. Open **Window → General → Console** and review each PASS/FAIL line.
+4. The final summary reports the total passed and failed checks. Any failure is logged as an error.
 
-The checks cover accepted/rejected movement, vertical movement bounds, fire cadence, empty ammo, reload state, damage bounds, pickup distance, and inventory/resource limits.
+## Coverage
 
-These checks exercise rule logic only. They do not simulate a network attacker, prove a server deployment is secure, or replace integration tests against a trusted authoritative server. No Unity execution has been performed by this repository update.
+The runner includes 36 checks covering:
+- Normal, excessive, vertical, non-finite, and invalid-tolerance movement.
+- Fire cadence, backwards timestamps, empty magazines, and reload blocking.
+- Damage bounds, pickup distance, and inventory limits.
+- Player registration and duplicate registration.
+- Authoritative movement and firing state.
+- Reload start, early completion rejection, and successful completion.
+- Server snapshots, ammo pickups, damage, elimination, and post-elimination movement rejection.
+
+## Important limitation
+
+This is a local Unity Editor logic test, not a live multiplayer security test. It does not prove a deployed server is secure, validate networking/authentication, or test server-side hit detection and persistence. The Unity Editor runner has been added and reviewed, but has **not been executed in Unity in this environment**. Run it locally to obtain an actual PASS/FAIL result.
