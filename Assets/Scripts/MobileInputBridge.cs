@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MobileInputBridge : MonoBehaviour
 {
@@ -25,6 +26,8 @@ public class MobileInputBridge : MonoBehaviour
         {
             Touch touch = Input.GetTouch(i);
             if (touch.position.x < Screen.width * 0.48f) continue;
+            // Ignore touches consumed by UI controls so firing/jump buttons do not rotate the camera.
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touch.fingerId)) continue;
             if (touch.phase == TouchPhase.Moved) LookDelta += touch.deltaPosition;
         }
     }
