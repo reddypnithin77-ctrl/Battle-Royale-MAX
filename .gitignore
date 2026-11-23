@@ -4,6 +4,9 @@
 !.env.example
 *.pem
 *.key
+/secrets/
+/**/service-account*.json
+**/firebase-adminsdk-*.json
 
 # Unity generated folders
 [Ll]ibrary/
