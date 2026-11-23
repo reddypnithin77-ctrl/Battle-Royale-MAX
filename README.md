@@ -15,6 +15,7 @@ The `Assets/Scripts` folder includes starter components for mobile input, third-
 - Weapon loadout slots, pickups, ammo, and weighted loot spawning.
 - Local training arena, bot spawning, and practice-round flow.
 - Original physics upgrade: accelerated movement, sprint/crouch, weapon recoil/spread, and an arcade Rigidbody vehicle controller. See [Original gameplay physics](Docs/ORIGINAL_GAMEPLAY_PHYSICS.md).
+- Unity Play Mode runtime tests for player movement/jump/crouch/sprint, weapon reload, and vehicle acceleration/braking. See [Play Mode physics tests](Docs/PLAY_MODE_PHYSICS_TESTS.md).
 - Anti-cheat validation foundation and an in-memory authoritative match-state example. See [Anti-cheat foundation](Docs/ANTI_CHEAT_FOUNDATION.md) and [authoritative match service](Docs/AUTHORITATIVE_MATCH_SERVICE.md).
 
 ## Generate a playable Unity training scene
