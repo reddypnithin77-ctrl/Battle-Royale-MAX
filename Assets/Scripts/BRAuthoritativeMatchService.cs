@@ -10,6 +10,7 @@ public class BRAuthoritativeMatchService
         public Vector3 position;
         public float lastMoveTime;
         public float lastShotTime = -999f;
+        public float lastResolvedShotTime = -999f;
         public int ammo;
         public int magazineSize;
         public int reserveAmmo;
@@ -21,6 +22,7 @@ public class BRAuthoritativeMatchService
     }
 
     private readonly Dictionary<string, PlayerState> players = new Dictionary<string, PlayerState>();
+    private readonly HashSet<string> consumedPickupIds = new HashSet<string>();
     private readonly BRAuditReporter audit;
     private readonly BRHeadshotAnomalyMonitor headshotMonitor = new BRHeadshotAnomalyMonitor();
 
@@ -92,13 +94,14 @@ public class BRAuthoritativeMatchService
         return true;
     }
 
-    public bool TryCollectAmmo(string authenticatedPlayerId, Vector3 serverPickupPosition,
+    public bool TryCollectAmmo(string authenticatedPlayerId, string serverPickupId, Vector3 serverPickupPosition,
         float pickupDistance, int ammoAmount, int maximumReserveAmmo)
     {
         PlayerState state;
         if (!TryGetActivePlayer(authenticatedPlayerId, out state)) return false;
 
-        if (ammoAmount <= 0 || !BRServerValidationRules.IsPickupValid(state.position, serverPickupPosition, pickupDistance) ||
+        if (string.IsNullOrWhiteSpace(serverPickupId) || consumedPickupIds.Contains(serverPickupId) ||
+            ammoAmount <= 0 || !BRServerValidationRules.IsPickupValid(state.position, serverPickupPosition, pickupDistance) ||
             !BRServerValidationRules.IsResourceChangeValid(state.reserveAmmo, ammoAmount, maximumReserveAmmo))
         {
             Report(authenticatedPlayerId, "pickup", "Rejected invalid ammo pickup");
@@ -106,6 +109,7 @@ public class BRAuthoritativeMatchService
         }
 
         state.reserveAmmo += ammoAmount;
+        consumedPickupIds.Add(serverPickupId);
         return true;
     }
 
@@ -125,7 +129,7 @@ public class BRAuthoritativeMatchService
     {
         PlayerState state;
         if (!TryGetActivePlayer(authenticatedPlayerId, out state) || !state.reloading ||
-            !IsFinite(serverTime) || serverTime < state.reloadEndsAt) return false;
+            !IsFinite(serverTime) || serverTime < state.reloadEndsAt || serverTime < state.lastMoveTime) return false;
         int loaded = Mathf.Min(state.magazineSize - state.ammo, state.reserveAmmo);
         state.ammo += loaded;
         state.reserveAmmo -= loaded;
@@ -155,7 +159,9 @@ public class BRAuthoritativeMatchService
             !TryGetActivePlayer(authenticatedTargetId, out target) ||
             authenticatedAttackerId == authenticatedTargetId ||
             !IsFinite(serverTime) ||
-            !BRServerValidationRules.IsDamageValid(damage, maximumDamage))
+            !BRServerValidationRules.IsDamageValid(damage, maximumDamage) ||
+            serverTime < attacker.lastShotTime || serverTime - attacker.lastShotTime > 0.5f ||
+            attacker.lastResolvedShotTime >= attacker.lastShotTime)
         {
             Report(authenticatedAttackerId, "hit-validation", "Rejected invalid hit request");
             return false;
@@ -173,11 +179,14 @@ public class BRAuthoritativeMatchService
         if (result.suspicious)
             Report(authenticatedAttackerId, "abnormal-headshots", result.reason);
 
+        attacker.lastResolvedShotTime = attacker.lastShotTime;
         target.health = Mathf.Max(0, target.health - Mathf.RoundToInt(damage));
         if (target.health == 0) target.eliminated = true;
         return true;
     }
 
+    // The caller must derive this ID from a backend-verified identity token, never from client input.
+    // Expose this as an own-profile operation only; do not add a target-player parameter to client APIs.
     public bool TryGetSnapshot(string authenticatedPlayerId, out Vector3 position,
         out int health, out int magazineAmmo, out int reserveAmmo, out bool eliminated)
     {
