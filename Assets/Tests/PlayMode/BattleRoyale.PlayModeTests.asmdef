@@ -1,6 +1,8 @@
 {
   "name": "BattleRoyale.PlayModeTests",
-  "references": [],
+  "references": [
+    "BattleRoyale.Runtime"
+  ],
   "optionalUnityReferences": [
     "TestAssemblies"
   ],
