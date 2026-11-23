@@ -24,3 +24,9 @@ These scripts are a foundation, not a finished game or APK. A Unity scene, origi
 - Touch look uses touches on the right side of the screen; keep UI buttons out of that area.
 - No online multiplayer, matchmaking, accounts, inventory, parachute, vehicles, anti-cheat, or production map is included yet.
 - Use original or properly licensed assets only.
+
+## Ammo, pickups, and HUD
+- `BRHitscanWeapon` now tracks magazine and reserve ammo and supports timed reloads. Press **R** in the Editor to reload; call its `Reload()` method from a mobile reload button.
+- Add `AmmoPickup` to a GameObject with a trigger collider. Give the player the `Player` tag and place the weapon under the player hierarchy.
+- Add `BRPrototypeHUD` to a Canvas object and assign optional legacy UI Text fields, the player's `Health`, and the weapon. It displays health, ammo, and safe-zone radius.
+- These are prototype UI/gameplay components; connect the reload button and create/position the Canvas controls in your scene.
