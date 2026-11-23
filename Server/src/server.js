@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { applicationDefault, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import pg from "pg";
-import { createIpRateLimiter } from "./auth-security.js";
+import { createIpRateLimiter, isValidFirebaseClaims } from "./auth-security.js";
 
 const { Pool } = pg;
 const PORT = Number(process.env.PORT || 8080);
@@ -58,10 +58,7 @@ const server = createServer(async (request, response) => {
     return sendJson(response, 404, { error: "not_found" });
   }
 
-  const forwardedFor = request.headers["x-forwarded-for"];
-  const clientIp = typeof forwardedFor === "string"
-    ? forwardedFor.split(",")[0].trim()
-    : request.socket.remoteAddress || "unknown";
+  const clientIp = request.socket.remoteAddress || "unknown";
   if (isRateLimited(clientIp)) return sendJson(response, 429, { error: "rate_limited" });
 
   const authorization = request.headers.authorization || "";
@@ -71,7 +68,7 @@ const server = createServer(async (request, response) => {
   try {
     // Firebase Admin verifies signature, expiry, issuer, audience and revocation.
     const decoded = await firebaseAuth.verifyIdToken(match[1], true);
-    if (!decoded.uid || decoded.aud !== FIREBASE_PROJECT_ID) {
+    if (!isValidFirebaseClaims(decoded, FIREBASE_PROJECT_ID)) {
       return sendJson(response, 401, { authenticated: false, error: "invalid_identity" });
     }
 
