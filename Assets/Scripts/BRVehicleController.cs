@@ -15,6 +15,9 @@ public class BRVehicleController : MonoBehaviour
     public Transform centerOfMass;
     public float downforce = 20f;
     public float airControl = 0.25f;
+    public float groundProbeRadius = 0.35f;
+    public float groundProbeDistance = 1.2f;
+    public LayerMask groundMask = ~0;
 
     private Rigidbody body;
     private float throttle;
@@ -31,6 +34,8 @@ public class BRVehicleController : MonoBehaviour
         lateralGrip = SafeNonNegative(lateralGrip, 7f);
         brakeStrength = SafeNonNegative(brakeStrength, 16f);
         downforce = SafeNonNegative(downforce, 20f);
+        groundProbeRadius = Mathf.Max(0.01f, SafeNonNegative(groundProbeRadius, 0.35f));
+        groundProbeDistance = Mathf.Max(0.01f, SafeNonNegative(groundProbeDistance, 1.2f));
         airControl = Mathf.Clamp(SafeNonNegative(airControl, 0.25f), 0f, 1f);
         body = GetComponent<Rigidbody>();
         body.interpolation = RigidbodyInterpolation.Interpolate;
@@ -39,7 +44,6 @@ public class BRVehicleController : MonoBehaviour
             body.centerOfMass = transform.InverseTransformPoint(centerOfMass.position);
     }
 
-    // Connect mobile UI buttons/axes to these public methods.
     public void SetDriveInput(float value) { throttle = IsFinite(value) ? Mathf.Clamp(value, -1f, 1f) : 0f; }
     public void SetSteeringInput(float value) { steering = IsFinite(value) ? Mathf.Clamp(value, -1f, 1f) : 0f; }
     public void SetBrake(bool value) { braking = value; }
@@ -51,7 +55,9 @@ public class BRVehicleController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 localVelocity = transform.InverseTransformDirection(body.velocity);
-        bool grounded = Physics.Raycast(transform.position + Vector3.up * 0.25f, Vector3.down, 1.2f);
+        bool grounded = Physics.SphereCast(transform.position + transform.up * 0.25f,
+            groundProbeRadius, -transform.up, out RaycastHit groundHit,
+            groundProbeDistance, groundMask, QueryTriggerInteraction.Ignore);
         float control = grounded ? 1f : airControl;
 
         if (throttle > 0f && localVelocity.z < maxForwardSpeed)
@@ -70,5 +76,10 @@ public class BRVehicleController : MonoBehaviour
             body.AddForce(-body.velocity * brakeStrength, ForceMode.Acceleration);
         if (grounded)
             body.AddForce(-transform.up * downforce, ForceMode.Acceleration);
+
+        // Clamp only the vehicle's forward/reverse component; preserve vertical and lateral motion.
+        localVelocity = transform.InverseTransformDirection(body.velocity);
+        localVelocity.z = Mathf.Clamp(localVelocity.z, -maxReverseSpeed, maxForwardSpeed);
+        body.velocity = transform.TransformDirection(localVelocity);
     }
 }
