@@ -22,6 +22,7 @@ public class BRAuthoritativeMatchService
 
     private readonly Dictionary<string, PlayerState> players = new Dictionary<string, PlayerState>();
     private readonly BRAuditReporter audit;
+    private readonly BRHeadshotAnomalyMonitor headshotMonitor = new BRHeadshotAnomalyMonitor();
 
     public BRAuthoritativeMatchService(BRAuditReporter auditReporter)
     {
@@ -139,6 +140,41 @@ public class BRAuthoritativeMatchService
         if (!TryGetActivePlayer(authenticatedPlayerId, out state) || damage <= 0 || damage > 100) return false;
         state.health = Mathf.Max(0, state.health - damage);
         if (state.health == 0) state.eliminated = true;
+        return true;
+    }
+
+    // Call only after trusted server physics has resolved the hit and line of sight.
+    // Never pass a client-provided hit result or client-computed visibility flag here.
+    public bool TryValidateAndApplyHit(string authenticatedAttackerId, string authenticatedTargetId,
+        float serverTime, float damage, float maximumDamage, bool isHeadshot,
+        bool serverLineOfSightClear)
+    {
+        PlayerState attacker;
+        PlayerState target;
+        if (!TryGetActivePlayer(authenticatedAttackerId, out attacker) ||
+            !TryGetActivePlayer(authenticatedTargetId, out target) ||
+            authenticatedAttackerId == authenticatedTargetId ||
+            !IsFinite(serverTime) ||
+            !BRServerValidationRules.IsDamageValid(damage, maximumDamage))
+        {
+            Report(authenticatedAttackerId, "hit-validation", "Rejected invalid hit request");
+            return false;
+        }
+
+        BRHeadshotAnomalyMonitor.Result result = headshotMonitor.Evaluate(
+            authenticatedAttackerId, serverTime, isHeadshot, serverLineOfSightClear);
+
+        if (!result.accepted)
+        {
+            Report(authenticatedAttackerId, "wall-hit", result.reason);
+            return false;
+        }
+
+        if (result.suspicious)
+            Report(authenticatedAttackerId, "abnormal-headshots", result.reason);
+
+        target.health = Mathf.Max(0, target.health - Mathf.RoundToInt(damage));
+        if (target.health == 0) target.eliminated = true;
         return true;
     }
 
