@@ -1,7 +1,7 @@
 {
   "name": "BattleRoyale.Runtime",
   "references": [
-    "Unity.ugui"
+    "UnityEngine.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
