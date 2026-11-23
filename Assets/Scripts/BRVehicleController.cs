@@ -23,6 +23,15 @@ public class BRVehicleController : MonoBehaviour
 
     private void Awake()
     {
+        acceleration = SafeNonNegative(acceleration, 18f);
+        reverseAcceleration = SafeNonNegative(reverseAcceleration, 9f);
+        maxForwardSpeed = SafeNonNegative(maxForwardSpeed, 24f);
+        maxReverseSpeed = SafeNonNegative(maxReverseSpeed, 8f);
+        steeringStrength = SafeNonNegative(steeringStrength, 85f);
+        lateralGrip = SafeNonNegative(lateralGrip, 7f);
+        brakeStrength = SafeNonNegative(brakeStrength, 16f);
+        downforce = SafeNonNegative(downforce, 20f);
+        airControl = Mathf.Clamp(SafeNonNegative(airControl, 0.25f), 0f, 1f);
         body = GetComponent<Rigidbody>();
         body.interpolation = RigidbodyInterpolation.Interpolate;
         body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
@@ -31,9 +40,13 @@ public class BRVehicleController : MonoBehaviour
     }
 
     // Connect mobile UI buttons/axes to these public methods.
-    public void SetDriveInput(float value) { throttle = Mathf.Clamp(value, -1f, 1f); }
-    public void SetSteeringInput(float value) { steering = Mathf.Clamp(value, -1f, 1f); }
+    public void SetDriveInput(float value) { throttle = IsFinite(value) ? Mathf.Clamp(value, -1f, 1f) : 0f; }
+    public void SetSteeringInput(float value) { steering = IsFinite(value) ? Mathf.Clamp(value, -1f, 1f) : 0f; }
     public void SetBrake(bool value) { braking = value; }
+
+    private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+    private static float SafeNonNegative(float value, float fallback) =>
+        IsFinite(value) ? Mathf.Max(0f, value) : fallback;
 
     private void FixedUpdate()
     {
