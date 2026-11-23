@@ -24,10 +24,13 @@ Named districts include Snowcrest Gate, Victory Arch, Moonstone Palace, Liongate
 See [INDIAN FIRE map guide](Docs/ARENA_GREYBOX.md).
 
 ## Gameplay systems
-- Mobile virtual joystick and touch buttons for fire, jump, reload, and weapon switching.
+- Landscape-first mobile play with a virtual joystick and touch buttons for fire, jump, reload, and weapon switching.
 - Weapon loadout slots, pickups, ammo, and weighted loot spawning.
 - Local training bots, safe zone, health, and practice-round flow.
 - Original movement physics, vehicle prototype, anti-cheat validation foundation, and an in-memory authoritative match-state example.
+
+## Unity project setup note
+The repository currently does not include `ProjectSettings/ProjectVersion.txt` or the rest of Unity's `ProjectSettings` folder. Unity Editor version and project settings must be established on the development machine before a reliable editor compile or Android build can be verified. Do not guess a Unity version; use the version installed for the project and resolve package compatibility in Package Manager.
 
 ## Still required
 - Original high-quality 3D characters, buildings, terrain, vehicles, animations, sound, and UI assets
