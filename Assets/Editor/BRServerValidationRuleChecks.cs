@@ -98,6 +98,55 @@ public static class BRServerValidationRuleChecks
         Check("eliminated player cannot move",
             match.TryMove("test-player", new Vector3(2f, 0f, 0f), 3f), false, ref passed, ref failed);
 
+
+        BRHeadshotAnomalyMonitor headshotMonitor = new BRHeadshotAnomalyMonitor();
+        BRHeadshotAnomalyMonitor.Result clearHeadshot =
+            headshotMonitor.Evaluate("headshot-normal", 1f, true, true);
+        Check("visible headshot accepted", clearHeadshot.accepted, true, ref passed, ref failed);
+        BRHeadshotAnomalyMonitor.Result wallHit =
+            headshotMonitor.Evaluate("wall-hitter", 1f, true, false);
+        Check("headshot through wall rejected", wallHit.accepted, false, ref passed, ref failed);
+        Check("wall hit raises suspicious signal", wallHit.suspicious, true, ref passed, ref failed);
+
+        BRHeadshotAnomalyMonitor normalPattern = new BRHeadshotAnomalyMonitor();
+        bool normalPatternFlagged = false;
+        for (int i = 0; i < 12; i++)
+        {
+            BRHeadshotAnomalyMonitor.Result hit = normalPattern.Evaluate(
+                "normal-pattern", i + 1f, i % 3 == 0, true);
+            normalPatternFlagged |= hit.suspicious;
+        }
+        Check("ordinary mixed hit pattern not flagged",
+            normalPatternFlagged, false, ref passed, ref failed);
+
+        BRHeadshotAnomalyMonitor abnormalPattern = new BRHeadshotAnomalyMonitor();
+        bool abnormalPatternFlagged = false;
+        for (int i = 0; i < 12; i++)
+        {
+            BRHeadshotAnomalyMonitor.Result hit = abnormalPattern.Evaluate(
+                "abnormal-pattern", i + 1f, true, true);
+            abnormalPatternFlagged |= hit.suspicious;
+        }
+        Check("repeated abnormal headshots flagged",
+            abnormalPatternFlagged, true, ref passed, ref failed);
+
+        BRHeadshotAnomalyMonitor backwardsHitMonitor = new BRHeadshotAnomalyMonitor();
+        backwardsHitMonitor.Evaluate("clock-check", 5f, false, true);
+        BRHeadshotAnomalyMonitor.Result backwardsHit =
+            backwardsHitMonitor.Evaluate("clock-check", 4f, true, true);
+        Check("backwards hit timestamp rejected",
+            backwardsHit.accepted, false, ref passed, ref failed);
+
+        BRAuthoritativeMatchService hitMatch = new BRAuthoritativeMatchService(null);
+        hitMatch.RegisterPlayer("attacker", Vector3.zero, 0f);
+        hitMatch.RegisterPlayer("target", new Vector3(0f, 0f, 5f), 0f);
+        Check("server visible headshot applies damage",
+            hitMatch.TryValidateAndApplyHit("attacker", "target", 1f, 25f, 40f, true, true),
+            true, ref passed, ref failed);
+        Check("server wall-obstructed hit rejected",
+            hitMatch.TryValidateAndApplyHit("attacker", "target", 2f, 25f, 40f, true, false),
+            false, ref passed, ref failed);
+
         string summary = "Anti-cheat rule checks: " + passed + " passed, " + failed + " failed.";
         if (failed == 0) Debug.Log("<color=green>" + summary + "</color>");
         else Debug.LogError(summary);
