@@ -27,3 +27,6 @@ jobs:
       - name: Run authentication security tests
         working-directory: Server
         run: npm test
+
+      - name: Build authentication server container
+        run: docker build -t brmax-auth-server ./Server
