@@ -23,6 +23,11 @@ Read [Unity Android setup](Docs/UNITY_ANDROID_STARTER.md) and [project roadmap](
 - Weighted loot spawning at hand-placed map points, with respawn after pickup.
 - Setup notes: [Mobile HUD and loot guide](Docs/MOBILE_HUD_AND_LOOT.md).
 
+## Practice match stage
+- Local bot spawning from configured scene points.
+- Countdown and practice-round status: training complete or player eliminated.
+- Setup guide: [Practice match setup](Docs/PRACTICE_MATCH_SETUP.md).
+
 ## Still required
 - A Unity scene, original 3D player/map/weapon assets, animations, and UI prefabs
 - Loot/inventory, vehicles, parachute, bots and match flow
