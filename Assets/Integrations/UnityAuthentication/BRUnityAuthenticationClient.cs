@@ -20,6 +20,7 @@ public class BRUnityAuthenticationClient : MonoBehaviour
 
     private bool servicesInitialized;
     private bool operationInProgress;
+    private bool verificationInProgress;
 
     public async void SignInAsGuest()
     {
@@ -70,7 +71,7 @@ public class BRUnityAuthenticationClient : MonoBehaviour
 
     private async Task RunAuthentication(Func<Task> signInOperation)
     {
-        if (operationInProgress)
+        if (operationInProgress || verificationInProgress)
         {
             SignInFailed?.Invoke("A sign-in request is already running.");
             return;
@@ -104,13 +105,15 @@ public class BRUnityAuthenticationClient : MonoBehaviour
 
     private IEnumerator VerifyBackendSession(string accessToken)
     {
+        verificationInProgress = true;
         if (!IsSafeVerificationEndpoint(verificationEndpoint))
         {
             SignInFailed?.Invoke("Set a valid HTTPS authentication server URL in the Inspector.");
+            verificationInProgress = false;
             yield break;
         }
 
-        using (UnityWebRequest request = new UnityWebRequest(verificationEndpoint, UnityWebRequest.kHttpVerbPOST))
+        using (UnityWebRequest request = new UnityWebRequest(verificationEndpoint, "POST"))
         {
             request.uploadHandler = new UploadHandlerRaw(new byte[0]);
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -123,6 +126,7 @@ public class BRUnityAuthenticationClient : MonoBehaviour
             {
                 Debug.LogWarning("Backend identity verification failed: HTTP " + request.responseCode);
                 SignInFailed?.Invoke("The game server could not verify your account. Please try again.");
+                verificationInProgress = false;
                 yield break;
             }
 
@@ -135,10 +139,12 @@ public class BRUnityAuthenticationClient : MonoBehaviour
                 response.player.playerId != AuthenticationService.Instance.PlayerId)
             {
                 SignInFailed?.Invoke("The game server returned an invalid account response.");
+                verificationInProgress = false;
                 yield break;
             }
 
             PlayerId = response.player.playerId;
+            verificationInProgress = false;
             Authenticated?.Invoke(PlayerId);
         }
     }
