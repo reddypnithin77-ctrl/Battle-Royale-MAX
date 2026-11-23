@@ -8,6 +8,8 @@
 - Fire requests consume server-held ammunition and obey server fire cadence/reload state.
 - Ammo pickups use server-known player and pickup positions plus inventory caps.
 - Server-applied damage controls health and elimination.
+- Server-resolved line-of-sight checks reject hits through obstructions.
+- A rolling headshot monitor flags unusually high headshot ratios and long headshot streaks for review.
 - A limited snapshot API exposes current authoritative state to a server transport layer.
 
 ## Integration boundary
