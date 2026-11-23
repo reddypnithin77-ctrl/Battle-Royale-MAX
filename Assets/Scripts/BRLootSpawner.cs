@@ -72,7 +72,7 @@ public class BRLootSpawner : MonoBehaviour
     {
         int count = 0;
         foreach (KeyValuePair<Transform, GameObject> pair in activeAtPoint)
-            if (pair.Value != null && pair.Value.name.StartsWith(prefab.name)) count++;
+            if (pair.Value != null && pair.Value.name == prefab.name + "(Clone)") count++;
         return count;
     }
 }
