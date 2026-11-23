@@ -8,11 +8,16 @@ public class Health : MonoBehaviour
     public event Action<float, float> Changed;
     public event Action Died;
 
-    void Awake() { Current = maxHealth; }
+    void Awake()
+    {
+        maxHealth = IsFinite(maxHealth) ? Mathf.Max(1f, maxHealth) : 100f;
+        Current = maxHealth;
+    }
 
     public void ApplyDamage(float amount)
     {
-        if (amount <= 0f || Current <= 0f) return;
+        if (!IsFinite(amount) || amount <= 0f || Current <= 0f) return;
+        if (!IsFinite(Current)) Current = maxHealth;
         Current = Mathf.Max(0f, Current - amount);
         Changed?.Invoke(Current, maxHealth);
         if (Current <= 0f) Died?.Invoke();
@@ -20,8 +25,10 @@ public class Health : MonoBehaviour
 
     public void Restore(float amount)
     {
-        if (amount <= 0f || Current <= 0f) return;
+        if (!IsFinite(amount) || amount <= 0f || Current <= 0f) return;
+        if (!IsFinite(Current)) Current = maxHealth;
         Current = Mathf.Min(maxHealth, Current + amount);
         Changed?.Invoke(Current, maxHealth);
     }
+    private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
 }
