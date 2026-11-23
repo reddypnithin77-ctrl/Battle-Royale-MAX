@@ -1,0 +1,29 @@
+name: Anti-Cheat Tests
+
+on:
+  push:
+    paths:
+      - 'Assets/Scripts/BRServerValidationRules.cs'
+      - 'Assets/Scripts/BRAuthoritativeMatchService.cs'
+      - 'Assets/Editor/BRServerValidationRuleChecks.cs'
+      - 'Tests/AntiCheatHarness/**'
+      - '.github/workflows/anti-cheat-tests.yml'
+  pull_request:
+    paths:
+      - 'Assets/Scripts/BRServerValidationRules.cs'
+      - 'Assets/Scripts/BRAuthoritativeMatchService.cs'
+      - 'Assets/Editor/BRServerValidationRuleChecks.cs'
+      - 'Tests/AntiCheatHarness/**'
+      - '.github/workflows/anti-cheat-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  anti-cheat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run anti-cheat rule checks
+        run: dotnet run --project Tests/AntiCheatHarness/AntiCheatHarness.csproj --configuration Release
