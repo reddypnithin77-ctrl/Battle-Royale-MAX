@@ -10,7 +10,12 @@ public class ProceduralTrainingArena : MonoBehaviour
     private void Start()
     {
         IndianFireWorldMap map = GetComponent<IndianFireWorldMap>();
-        if (map == null) map = gameObject.AddComponent<IndianFireWorldMap>();
+        if (map == null)
+        {
+            // A newly added component generates itself in Start; avoid building twice.
+            gameObject.AddComponent<IndianFireWorldMap>();
+            return;
+        }
         map.Generate();
     }
 
