@@ -15,6 +15,7 @@ public class BRPlayerMotor : MonoBehaviour
     public float crouchHeight = 1.15f;
     public float standingHeight = 1.9f;
     public float stanceLerpSpeed = 12f;
+    public LayerMask stanceObstacleMask = ~0;
     [Header("References")]
     public Transform cameraTransform;
 
@@ -26,7 +27,6 @@ public class BRPlayerMotor : MonoBehaviour
     private bool sprintRequested;
     private bool crouchRequested;
 
-    // Public controls allow mobile UI and automated Play Mode tests to drive stance.
     public void SetSprint(bool active) { sprintRequested = active; }
     public void SetCrouch(bool active) { crouchRequested = active; }
 
@@ -34,6 +34,7 @@ public class BRPlayerMotor : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         standingHeight = Mathf.Max(standingHeight, controller.height);
+        crouchHeight = Mathf.Clamp(crouchHeight, controller.radius * 2f, standingHeight);
         defaultCenterY = controller.center.y;
     }
 
@@ -45,8 +46,8 @@ public class BRPlayerMotor : MonoBehaviour
             input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
         bool sprint = (sprintRequested || Input.GetKey(KeyCode.LeftShift)) && input.y > 0.1f;
-        crouching = crouchRequested || Input.GetKey(KeyCode.C);
-        float targetSpeed = crouching ? crouchSpeed : (sprint ? sprintSpeed : walkSpeed);
+        bool wantsCrouch = crouchRequested || Input.GetKey(KeyCode.C);
+        float targetSpeed = wantsCrouch ? crouchSpeed : (sprint ? sprintSpeed : walkSpeed);
 
         Transform cam = cameraTransform != null ? cameraTransform : (Camera.main != null ? Camera.main.transform : transform);
         Vector3 forward = Vector3.ProjectOnPlane(cam.forward, Vector3.up).normalized;
@@ -61,19 +62,40 @@ public class BRPlayerMotor : MonoBehaviour
 
         bool jump = bridge != null && bridge.ConsumeJump();
         if (Input.GetButtonDown("Jump")) jump = true;
-        if (jump && controller.isGrounded && !crouching)
+        if (jump && controller.isGrounded && !wantsCrouch)
             verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 
         verticalVelocity.y += gravity * Time.deltaTime;
         controller.Move((planarVelocity + verticalVelocity) * Time.deltaTime);
 
-        float wantedHeight = crouching ? crouchHeight : standingHeight;
+        float wantedHeight = wantsCrouch ? crouchHeight : standingHeight;
+        if (wantedHeight > controller.height && !HasStandingClearance())
+            wantedHeight = controller.height;
+
         controller.height = Mathf.Lerp(controller.height, wantedHeight, stanceLerpSpeed * Time.deltaTime);
         Vector3 center = controller.center;
         center.y = defaultCenterY + (controller.height - standingHeight) * 0.5f;
         controller.center = center;
+        crouching = controller.height < standingHeight - 0.05f;
 
         if (desiredDirection.sqrMagnitude > 0.01f)
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredDirection), 12f * Time.deltaTime);
+    }
+
+    private bool HasStandingClearance()
+    {
+        float radius = Mathf.Max(0.01f, controller.radius * 0.95f);
+        Vector3 worldCenter = transform.TransformPoint(controller.center);
+        float halfSegment = Mathf.Max(0f, standingHeight * 0.5f - radius);
+        Vector3 bottom = worldCenter + Vector3.down * halfSegment;
+        Vector3 top = worldCenter + Vector3.up * halfSegment;
+        Collider[] overlaps = Physics.OverlapCapsule(bottom, top, radius, stanceObstacleMask, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < overlaps.Length; i++)
+        {
+            Collider hit = overlaps[i];
+            if (hit != null && hit != controller && !hit.transform.IsChildOf(transform))
+                return false;
+        }
+        return true;
     }
 }
