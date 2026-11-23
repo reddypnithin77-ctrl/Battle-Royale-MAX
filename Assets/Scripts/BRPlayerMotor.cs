@@ -23,6 +23,12 @@ public class BRPlayerMotor : MonoBehaviour
     private Vector3 planarVelocity;
     private float defaultCenterY;
     private bool crouching;
+    private bool sprintRequested;
+    private bool crouchRequested;
+
+    // Public controls allow mobile UI and automated Play Mode tests to drive stance.
+    public void SetSprint(bool active) { sprintRequested = active; }
+    public void SetCrouch(bool active) { crouchRequested = active; }
 
     private void Awake()
     {
@@ -38,8 +44,8 @@ public class BRPlayerMotor : MonoBehaviour
         if (input.sqrMagnitude < 0.001f)
             input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        bool sprint = Input.GetKey(KeyCode.LeftShift) && input.y > 0.1f;
-        crouching = Input.GetKey(KeyCode.C);
+        bool sprint = (sprintRequested || Input.GetKey(KeyCode.LeftShift)) && input.y > 0.1f;
+        crouching = crouchRequested || Input.GetKey(KeyCode.C);
         float targetSpeed = crouching ? crouchSpeed : (sprint ? sprintSpeed : walkSpeed);
 
         Transform cam = cameraTransform != null ? cameraTransform : (Camera.main != null ? Camera.main.transform : transform);
