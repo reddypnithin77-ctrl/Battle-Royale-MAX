@@ -85,6 +85,8 @@ public static class BRTrainingSceneBuilder
         BRMatchFlow match = manager.AddComponent<BRMatchFlow>();
         match.playerHealth = player.GetComponent<Health>();
         match.statusText = CreateStatusText();
+        CreateMobileControls(loadout);
+        CreateGameplayHud(gun, player.GetComponent<Health>());
 
         Selection.activeGameObject = player;
         EditorSceneManager.MarkSceneDirty(scene);
@@ -187,6 +189,96 @@ public static class BRTrainingSceneBuilder
         label.color = Color.white;
         label.text = "PRACTICE MATCH";
         return label;
+    }
+
+
+    private static void CreateMobileControls(BRWeaponLoadout loadout)
+    {
+        GameObject eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+        GameObject canvasObject = new GameObject("Mobile Controls", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        Canvas canvas = canvasObject.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+
+        GameObject joystick = CreateUiImage("Move Joystick", canvasObject.transform, new Vector2(0f, 0f), new Vector2(190f, 190f), new Vector2(0f, 0f), new Vector2(90f, 90f), new Color(0.08f, 0.1f, 0.12f, 0.48f));
+        GameObject handle = CreateUiImage("Joystick Handle", joystick.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(82f, 82f), new Color(0.8f, 0.85f, 0.9f, 0.8f));
+        BRVirtualJoystick virtualJoystick = joystick.AddComponent<BRVirtualJoystick>();
+        virtualJoystick.handle = handle.GetComponent<RectTransform>();
+
+        CreateActionButton(canvasObject.transform, "FIRE", BRMobileButton.ButtonAction.Fire, loadout, new Vector2(1f, 0f), new Vector2(-150f, 150f), new Vector2(170f, 170f));
+        CreateActionButton(canvasObject.transform, "JUMP", BRMobileButton.ButtonAction.Jump, loadout, new Vector2(1f, 0f), new Vector2(-340f, 115f), new Vector2(120f, 120f));
+        CreateActionButton(canvasObject.transform, "RELOAD", BRMobileButton.ButtonAction.Reload, loadout, new Vector2(1f, 0f), new Vector2(-150f, 345f), new Vector2(120f, 76f));
+        CreateActionButton(canvasObject.transform, "NEXT", BRMobileButton.ButtonAction.NextWeapon, loadout, new Vector2(1f, 0f), new Vector2(-340f, 285f), new Vector2(120f, 76f));
+    }
+
+    private static void CreateGameplayHud(BRHitscanWeapon weapon, Health health)
+    {
+        GameObject canvasObject = GameObject.Find("Mobile Controls");
+        if (canvasObject == null) return;
+        BRPrototypeHUD hud = canvasObject.AddComponent<BRPrototypeHUD>();
+        hud.weapon = weapon;
+        hud.playerHealth = health;
+        hud.ammoText = CreateHudText(canvasObject.transform, "Ammo HUD", new Vector2(1f, 1f), new Vector2(-155f, -38f), new Vector2(280f, 54f));
+        hud.healthText = CreateHudText(canvasObject.transform, "Health HUD", new Vector2(0f, 1f), new Vector2(150f, -38f), new Vector2(260f, 54f));
+        hud.zoneText = CreateHudText(canvasObject.transform, "Zone HUD", new Vector2(0.5f, 1f), new Vector2(0f, -38f), new Vector2(320f, 54f));
+    }
+
+    private static void CreateActionButton(Transform parent, string label, BRMobileButton.ButtonAction action, BRWeaponLoadout loadout, Vector2 anchor, Vector2 position, Vector2 size)
+    {
+        GameObject button = CreateUiImage(label + " Button", parent, anchor, anchor, position, size, new Color(0.08f, 0.1f, 0.12f, 0.58f));
+        BRMobileButton control = button.AddComponent<BRMobileButton>();
+        control.action = action;
+        control.loadout = loadout;
+        GameObject textObject = new GameObject(label + " Label", typeof(RectTransform), typeof(Text));
+        textObject.transform.SetParent(button.transform, false);
+        RectTransform rect = textObject.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        Text text = textObject.GetComponent<Text>();
+        text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        text.text = label;
+        text.fontSize = 26;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = Color.white;
+        text.raycastTarget = false;
+    }
+
+    private static GameObject CreateUiImage(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size, Color color)
+    {
+        GameObject item = new GameObject(name, typeof(RectTransform), typeof(Image));
+        item.transform.SetParent(parent, false);
+        RectTransform rect = item.GetComponent<RectTransform>();
+        rect.anchorMin = anchorMin;
+        rect.anchorMax = anchorMax;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+        item.GetComponent<Image>().color = color;
+        return item;
+    }
+
+    private static Text CreateHudText(Transform parent, string name, Vector2 anchor, Vector2 position, Vector2 size)
+    {
+        GameObject textObject = new GameObject(name, typeof(RectTransform), typeof(Text));
+        textObject.transform.SetParent(parent, false);
+        RectTransform rect = textObject.GetComponent<RectTransform>();
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+        Text text = textObject.GetComponent<Text>();
+        text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        text.fontSize = 30;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = Color.white;
+        text.raycastTarget = false;
+        return text;
     }
 
     private static void CreateLight()
