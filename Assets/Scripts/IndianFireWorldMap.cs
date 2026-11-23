@@ -1,17 +1,24 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-// Original, stylized India-inspired world map for INDIAN FIRE.
-// This is a fictional game layout, not a geographic or navigational map.
+// Original fictional India-inspired battle-royale world for INDIAN FIRE.
+// The full mainland silhouette includes the Northeast extension and southern peninsula.
+// All structures and place names are procedural placeholders, not copied game assets.
 public class IndianFireWorldMap : MonoBehaviour
 {
     private const float MapWidth = 150f;
     private const float MapHeight = 180f;
     private const float TileSize = 7.5f;
+    private static readonly Dictionary<Color, Material> Materials = new Dictionary<Color, Material>();
 
     private static readonly Vector2[] Outline =
     {
         new Vector2(-0.18f, 0.98f), new Vector2(0.12f, 0.94f),
         new Vector2(0.31f, 0.82f), new Vector2(0.43f, 0.66f),
+        // Full Northeast extension: eastern corridor and the seven-sister region.
+        new Vector2(0.56f, 0.73f), new Vector2(0.72f, 0.82f),
+        new Vector2(0.96f, 0.78f), new Vector2(0.91f, 0.64f),
+        new Vector2(0.78f, 0.57f), new Vector2(0.64f, 0.48f),
         new Vector2(0.57f, 0.53f), new Vector2(0.62f, 0.34f),
         new Vector2(0.53f, 0.16f), new Vector2(0.43f, -0.02f),
         new Vector2(0.28f, -0.22f), new Vector2(0.15f, -0.49f),
@@ -43,6 +50,8 @@ public class IndianFireWorldMap : MonoBehaviour
         new Landmark("LIONGATE PORT", -0.43f, -0.12f, new Color(0.78f, 0.67f, 0.43f)),
         new Landmark("FOUR ARCH BAZAAR", 0.16f, 0.02f, new Color(0.83f, 0.61f, 0.38f)),
         new Landmark("RIVER CROWN", 0.34f, 0.48f, new Color(0.58f, 0.76f, 0.78f)),
+        new Landmark("BRAHMAPUTRA FRONTIER", 0.72f, 0.67f, new Color(0.48f, 0.72f, 0.76f)),
+        new Landmark("EASTERN HIGHLANDS", 0.70f, 0.82f, new Color(0.61f, 0.73f, 0.58f)),
         new Landmark("GOLDEN SANCTUARY", -0.26f, 0.72f, new Color(0.92f, 0.78f, 0.36f)),
         new Landmark("SUNSPIRE COAST", 0.49f, -0.12f, new Color(0.91f, 0.72f, 0.42f)),
         new Landmark("TECH VALLEY", 0.06f, -0.36f, new Color(0.42f, 0.75f, 0.69f)),
@@ -56,7 +65,11 @@ public class IndianFireWorldMap : MonoBehaviour
     public void Generate()
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
-            Destroy(transform.GetChild(i).gameObject);
+        {
+            Transform child = transform.GetChild(i);
+            if (Application.isPlaying) Destroy(child.gameObject);
+            else DestroyImmediate(child.gameObject);
+        }
 
         CreateBlock("INDIAN FIRE Ocean", new Vector3(0f, -1.8f, 0f),
             new Vector3(230f, 1f, 250f), new Color(0.12f, 0.30f, 0.39f));
@@ -79,9 +92,15 @@ public class IndianFireWorldMap : MonoBehaviour
                         ? new Color(0.60f, 0.48f, 0.31f)
                         : new Color(0.43f, 0.53f, 0.34f);
 
-            CreateBlock("India Terrain Tile", new Vector3(px, -0.85f, pz),
+            CreateBlock("India Terrain Tile", new Vector3(px, -0.5f, pz),
                 new Vector3(TileSize + 0.15f, 1f, TileSize + 0.15f), terrain);
         }
+
+        CreateRoad(new Vector3(-24f, -0.28f, 48f), new Vector3(20f, -0.28f, 35f));
+        CreateRoad(new Vector3(20f, -0.28f, 35f), new Vector3(-24f, -0.28f, 8f));
+        CreateRoad(new Vector3(-24f, -0.28f, 8f), new Vector3(-32f, -0.28f, -11f));
+        CreateRoad(new Vector3(-32f, -0.28f, -11f), new Vector3(12f, -0.28f, -32f));
+        CreateRoad(new Vector3(12f, -0.28f, -32f), new Vector3(-4f, -0.28f, -56f));
 
         for (int i = 0; i < Landmarks.Length; i++)
             CreateLandmark(Landmarks[i]);
@@ -106,21 +125,85 @@ public class IndianFireWorldMap : MonoBehaviour
         Vector3 p = new Vector3(landmark.position.x * MapWidth * 0.5f, 0f,
             landmark.position.y * MapHeight * 0.5f);
 
-        GameObject plaza = CreateBlock(landmark.name, p + Vector3.up * 0.35f,
-            new Vector3(10f, 0.7f, 10f), landmark.color);
+        CreateBlock(landmark.name + " Plaza", p + Vector3.up * 0.18f,
+            new Vector3(19f, 0.35f, 19f), landmark.color);
         CreateBlock(landmark.name + " Landmark", p + Vector3.up * 2.2f,
             new Vector3(3.2f, 4f, 3.2f), new Color(0.78f, 0.76f, 0.68f));
 
-        GameObject label = new GameObject(landmark.name + " Label");
-        label.transform.SetParent(transform, true);
-        label.transform.position = p + new Vector3(0f, 5.2f, 0f);
-        TextMesh text = label.AddComponent<TextMesh>();
-        text.text = landmark.name;
-        text.characterSize = 0.65f;
-        text.fontSize = 48;
+        CreateBuilding(landmark.name + " - Market House", p + new Vector3(-13f, 0f, 7f),
+            new Vector3(8f, 5f, 8f), new Color(0.69f, 0.54f, 0.39f));
+        CreateBuilding(landmark.name + " - Storehouse", p + new Vector3(13f, 0f, 7f),
+            new Vector3(9f, 6f, 8f), new Color(0.52f, 0.56f, 0.53f));
+        CreateBuilding(landmark.name + " - Residence", p + new Vector3(0f, 0f, -14f),
+            new Vector3(8f, 5f, 7f), new Color(0.72f, 0.66f, 0.52f));
+
+        CreateLootAreaLabel(landmark.name + " LOOT AREA", p + new Vector3(0f, 6f, 11f));
+        CreatePickup("Health Supply", PrimitiveType.Sphere, p + new Vector3(-4f, 0.9f, 2f),
+            new Color(0.25f, 0.85f, 0.45f), true);
+        CreatePickup("Ammo Supply", PrimitiveType.Cube, p + new Vector3(4f, 0.75f, 2f),
+            new Color(0.95f, 0.72f, 0.2f), false);
+    }
+
+    private void CreateBuilding(string name, Vector3 center, Vector3 size, Color wallColor)
+    {
+        float wall = 0.45f;
+        float halfX = size.x * 0.5f;
+        float halfZ = size.z * 0.5f;
+        float height = size.y;
+
+        CreateBlock(name + " Back Wall", center + new Vector3(0f, height * 0.5f, halfZ),
+            new Vector3(size.x, height, wall), wallColor);
+        CreateBlock(name + " Left Wall", center + new Vector3(-halfX, height * 0.5f, 0f),
+            new Vector3(wall, height, size.z), wallColor);
+        CreateBlock(name + " Right Wall", center + new Vector3(halfX, height * 0.5f, 0f),
+            new Vector3(wall, height, size.z), wallColor);
+        CreateBlock(name + " Front Left", center + new Vector3(-size.x * 0.32f, height * 0.5f, -halfZ),
+            new Vector3(size.x * 0.36f, height, wall), wallColor);
+        CreateBlock(name + " Front Right", center + new Vector3(size.x * 0.32f, height * 0.5f, -halfZ),
+            new Vector3(size.x * 0.36f, height, wall), wallColor);
+        CreateBlock(name + " Roof", center + new Vector3(0f, height + 0.25f, 0f),
+            new Vector3(size.x + 0.8f, 0.5f, size.z + 0.8f), new Color(0.32f, 0.29f, 0.27f));
+        CreateBlock(name + " Doorstep", center + new Vector3(0f, 0.12f, -halfZ - 0.6f),
+            new Vector3(2.2f, 0.24f, 1.2f), new Color(0.55f, 0.46f, 0.34f));
+    }
+
+    private void CreateRoad(Vector3 start, Vector3 end)
+    {
+        Vector3 delta = end - start;
+        GameObject road = CreateBlock("Village Road", (start + end) * 0.5f,
+            new Vector3(3.4f, 0.18f, delta.magnitude), new Color(0.25f, 0.25f, 0.23f));
+        road.transform.rotation = Quaternion.LookRotation(delta.normalized, Vector3.up);
+    }
+
+    private void CreateLootAreaLabel(string label, Vector3 position)
+    {
+        GameObject item = new GameObject(label);
+        item.transform.SetParent(transform, true);
+        item.transform.position = position;
+        TextMesh text = item.AddComponent<TextMesh>();
+        text.text = label;
+        text.characterSize = 0.48f;
+        text.fontSize = 36;
         text.anchor = TextAnchor.MiddleCenter;
         text.alignment = TextAlignment.Center;
-        text.color = Color.white;
+        text.color = new Color(1f, 0.9f, 0.55f);
+    }
+
+    private void CreatePickup(string label, PrimitiveType shape, Vector3 position, Color color, bool health)
+    {
+        GameObject item = GameObject.CreatePrimitive(shape);
+        item.name = label;
+        item.transform.SetParent(transform, true);
+        item.transform.position = position;
+        item.transform.localScale = Vector3.one * 0.8f;
+        Collider collider = item.GetComponent<Collider>();
+        collider.isTrigger = true;
+        Rigidbody body = item.AddComponent<Rigidbody>();
+        body.isKinematic = true;
+        body.useGravity = false;
+        if (health) item.AddComponent<HealthPickup>();
+        else item.AddComponent<AmmoPickup>();
+        SetColor(item, color);
     }
 
     private GameObject CreateBlock(string objectName, Vector3 position, Vector3 scale, Color color)
@@ -130,13 +213,24 @@ public class IndianFireWorldMap : MonoBehaviour
         block.transform.SetParent(transform, true);
         block.transform.position = position;
         block.transform.localScale = scale;
-        Renderer renderer = block.GetComponent<Renderer>();
-        if (renderer != null)
+        SetColor(block, color);
+        return block;
+    }
+
+    private void SetColor(GameObject item, Color color)
+    {
+        Renderer renderer = item.GetComponent<Renderer>();
+        if (renderer == null) return;
+        Material material;
+        if (!Materials.TryGetValue(color, out material))
         {
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
-            if (shader != null) renderer.material = new Material(shader) { color = color };
+            if (shader == null) return;
+            material = new Material(shader);
+            material.color = color;
+            Materials.Add(color, material);
         }
-        return block;
+        renderer.sharedMaterial = material;
     }
 }

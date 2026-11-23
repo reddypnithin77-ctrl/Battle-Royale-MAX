@@ -9,6 +9,12 @@ public class BRPrototypeHUD : MonoBehaviour
     public Text ammoText;
     public Text healthText;
     public Text zoneText;
+    private SafeZone safeZone;
+
+    private void Awake()
+    {
+        safeZone = FindObjectOfType<SafeZone>();
+    }
 
     private void Update()
     {
@@ -16,8 +22,7 @@ public class BRPrototypeHUD : MonoBehaviour
             ammoText.text = weapon.IsReloading ? "RELOADING..." : weapon.AmmoInMagazine + " / " + weapon.ReserveAmmo;
         if (playerHealth != null && healthText != null)
             healthText.text = "HP " + Mathf.CeilToInt(playerHealth.Current);
-        SafeZone zone = FindObjectOfType<SafeZone>();
-        if (zone != null && zoneText != null)
-            zoneText.text = "SAFE ZONE " + Mathf.CeilToInt(zone.CurrentRadius) + "m";
+        if (safeZone != null && zoneText != null)
+            zoneText.text = "SAFE ZONE " + Mathf.CeilToInt(safeZone.CurrentRadius) + "m";
     }
 }

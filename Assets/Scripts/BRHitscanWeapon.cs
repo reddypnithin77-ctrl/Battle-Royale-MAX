@@ -28,12 +28,19 @@ public class BRHitscanWeapon : MonoBehaviour
     private float recoilPitch;
     private float recoilYaw;
 
-    private void Awake() { AmmoInMagazine = magazineSize; }
+    private void Awake()
+    {
+        magazineSize = Mathf.Max(1, magazineSize);
+        reserveAmmo = Mathf.Max(0, reserveAmmo);
+        AmmoInMagazine = magazineSize;
+    }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R)) Reload();
-        bool firing = MobileInputBridge.Instance != null ? MobileInputBridge.Instance.FireHeld : Input.GetMouseButton(0);
+        // Keep mouse testing available in the Editor even when the mobile input bridge exists.
+        bool mobileFire = MobileInputBridge.Instance != null && MobileInputBridge.Instance.FireHeld;
+        bool firing = mobileFire || Input.GetMouseButton(0);
         if (firing && !IsReloading && Time.time >= nextShot)
         {
             if (AmmoInMagazine <= 0) { Reload(); return; }
@@ -56,7 +63,7 @@ public class BRHitscanWeapon : MonoBehaviour
     private IEnumerator ReloadRoutine()
     {
         IsReloading = true;
-        yield return new WaitForSeconds(reloadSeconds);
+        yield return new WaitForSeconds(Mathf.Max(0f, reloadSeconds));
         int needed = magazineSize - AmmoInMagazine;
         int loaded = Mathf.Min(needed, reserveAmmo);
         AmmoInMagazine += loaded;
