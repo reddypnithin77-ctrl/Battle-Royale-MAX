@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Install verifier dependency
+      - name: Install verifier dependencies
         working-directory: Server
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Check server JavaScript syntax
@@ -27,6 +27,5 @@ jobs:
       - name: Run authentication security tests
         working-directory: Server
         run: npm test
-
       - name: Build authentication server container
         run: docker build -t brmax-auth-server ./Server
