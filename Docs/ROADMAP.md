@@ -1,6 +1,6 @@
-# Development roadmap
+# INDIAN FIRE — Development roadmap
 
-1. **Local vertical slice:** movement, camera, test map, health, safe-zone prototype.
+1. **Local vertical slice:** movement, camera, INDIAN FIRE India-inspired world map, health, safe-zone prototype.
 2. **Combat loop:** server-validated weapon firing, reloads, ammo, pickups, hit feedback.
 3. **Android UX:** joystick, look drag, fire/reload/jump/crouch buttons, graphics settings.
 4. **Online rooms:** authentication, matchmaking, lobby, party invites, reconnect handling.
