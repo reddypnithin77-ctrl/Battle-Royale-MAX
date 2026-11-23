@@ -117,27 +117,8 @@ public static class BRTrainingSceneBuilder
 
     private static void CreateArena()
     {
-        GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        floor.name = "Arena Ground";
-        floor.transform.position = new Vector3(0f, -0.5f, 0f);
-        floor.transform.localScale = new Vector3(120f, 1f, 120f);
-
-        for (int i = 0; i < 12; i++)
-        {
-            float angle = i * Mathf.PI * 2f / 12f;
-            GameObject cover = GameObject.CreatePrimitive(i % 2 == 0 ? PrimitiveType.Cube : PrimitiveType.Cylinder);
-            cover.name = "Cover " + (i + 1);
-            cover.transform.position = new Vector3(Mathf.Cos(angle) * 12f, 0.8f, Mathf.Sin(angle) * 12f);
-            cover.transform.localScale = i % 2 == 0 ? new Vector3(3f, 1.6f, 2f) : new Vector3(2f, 1.6f, 2f);
-        }
-
-        for (int i = 0; i < 4; i++)
-        {
-            GameObject building = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            building.name = "Training Building " + (i + 1);
-            building.transform.position = new Vector3((i % 2 == 0 ? -1f : 1f) * 28f, 3f, (i < 2 ? -1f : 1f) * 24f);
-            building.transform.localScale = new Vector3(12f, 6f, 10f);
-        }
+        GameObject world = new GameObject("INDIAN FIRE - India World Map");
+        world.AddComponent<IndianFireWorldMap>();
     }
 
     private static Transform[] CreateSpawnPoints()
