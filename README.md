@@ -42,3 +42,9 @@ Unity Editor and Android Build Support are required on a Windows, macOS, or Linu
 - Unity Editor menu: **Tools → Battle Royale → Build Training Scene**.
 - Creates a local arena, player, third-person camera, placeholder weapon, pickups, safe-zone visual, bot prefab, and practice-match HUD.
 - Guide: [Build the training scene](Docs/BUILD_TRAINING_SCENE.md).
+
+
+## Anti-cheat foundation
+- Reusable server-side validation for movement, firing cadence, ammo/reload state, damage, pickups, and resource bounds.
+- Structured audit events for suspicious actions.
+- Guide: [Anti-cheat foundation](Docs/ANTI_CHEAT_FOUNDATION.md).
