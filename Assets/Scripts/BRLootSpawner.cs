@@ -22,7 +22,7 @@ public class BRLootSpawner : MonoBehaviour
 
     private void Start()
     {
-        if (!spawnOnStart) return;
+        if (!spawnOnStart || spawnPoints == null) return;
         foreach (Transform point in spawnPoints)
             if (point != null) SpawnAt(point);
     }
@@ -50,15 +50,29 @@ public class BRLootSpawner : MonoBehaviour
         if (lootTable == null || lootTable.Length == 0) return null;
         float total = 0f;
         foreach (LootEntry entry in lootTable)
-            if (entry != null && entry.prefab != null && entry.weight > 0f) total += entry.weight;
+        {
+            if (entry == null || entry.prefab == null || entry.weight <= 0f || entry.maxActive <= 0) continue;
+            int activeCount = CountActive(entry.prefab);
+            if (activeCount < entry.maxActive) total += entry.weight;
+        }
         if (total <= 0f) return null;
+
         float roll = Random.value * total;
         foreach (LootEntry entry in lootTable)
         {
-            if (entry == null || entry.prefab == null || entry.weight <= 0f) continue;
+            if (entry == null || entry.prefab == null || entry.weight <= 0f || entry.maxActive <= 0 ||
+                CountActive(entry.prefab) >= entry.maxActive) continue;
             roll -= entry.weight;
             if (roll <= 0f) return entry.prefab;
         }
         return null;
+    }
+
+    private int CountActive(GameObject prefab)
+    {
+        int count = 0;
+        foreach (KeyValuePair<Transform, GameObject> pair in activeAtPoint)
+            if (pair.Value != null && pair.Value.name.StartsWith(prefab.name)) count++;
+        return count;
     }
 }
