@@ -1,8 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createIpRateLimiter, isValidUnityClaims } from "../src/auth-security.js";
+import { createIpRateLimiter, isValidFirebaseClaims, isValidUnityClaims } from "../src/auth-security.js";
 
-test("Unity claims require a subject and the configured project", () => {
+test("Firebase claims require a UID and the configured Firebase project", () => {
+  assert.equal(isValidFirebaseClaims({ uid: "player-1", aud: "firebase-project" }, "firebase-project"), true);
+  assert.equal(isValidFirebaseClaims({ uid: "player-1", aud: "other-project" }, "firebase-project"), false);
+  assert.equal(isValidFirebaseClaims({ aud: "firebase-project" }, "firebase-project"), false);
+  assert.equal(isValidFirebaseClaims({ uid: "", aud: "firebase-project" }, "firebase-project"), false);
+  assert.equal(isValidFirebaseClaims({ uid: "x".repeat(129), aud: "firebase-project" }, "firebase-project"), false);
+  assert.equal(isValidFirebaseClaims(null, "firebase-project"), false);
+});
+
+test("Legacy Unity claims helper remains strict", () => {
   assert.equal(isValidUnityClaims({ sub: "player-1", project_id: "project-1" }, "project-1"), true);
   assert.equal(isValidUnityClaims({ sub: "player-1", project_id: "other-project" }, "project-1"), false);
   assert.equal(isValidUnityClaims({ project_id: "project-1" }, "project-1"), false);
