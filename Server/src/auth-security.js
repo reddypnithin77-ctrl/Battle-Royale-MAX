@@ -8,6 +8,16 @@ export function isValidUnityClaims(payload, expectedProjectId) {
     payload.project_id === expectedProjectId;
 }
 
+export function isValidFirebaseClaims(payload, expectedProjectId) {
+  return !!payload &&
+    typeof payload.uid === "string" &&
+    payload.uid.length > 0 &&
+    payload.uid.length <= 128 &&
+    typeof expectedProjectId === "string" &&
+    expectedProjectId.length > 0 &&
+    payload.aud === expectedProjectId;
+}
+
 export function createIpRateLimiter({
   limit = 30,
   windowMs = 60_000,
@@ -30,7 +40,6 @@ export function createIpRateLimiter({
           windows.delete(storedIp);
         }
       }
-      // Fail closed rather than allowing unbounded memory growth.
       if (windows.size >= maxEntries) return true;
     }
 
