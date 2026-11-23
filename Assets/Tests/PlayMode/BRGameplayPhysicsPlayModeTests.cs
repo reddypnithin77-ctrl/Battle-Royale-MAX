@@ -7,6 +7,7 @@ public class BRGameplayPhysicsPlayModeTests
 {
     private GameObject bridgeObject;
     private GameObject floorObject;
+    private GameObject playerObject;
 
     [UnitySetUp]
     public IEnumerator SetUp()
@@ -26,14 +27,14 @@ public class BRGameplayPhysicsPlayModeTests
     {
         if (bridgeObject != null) Object.Destroy(bridgeObject);
         if (floorObject != null) Object.Destroy(floorObject);
-        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
-            Object.Destroy(player);
+        if (playerObject != null) Object.Destroy(playerObject);
         yield return null;
     }
 
     private BRPlayerMotor CreatePlayer()
     {
-        GameObject player = new GameObject("PlayMode Test Player");
+        playerObject = new GameObject("PlayMode Test Player");
+        GameObject player = playerObject;
         player.transform.position = new Vector3(0f, 1.05f, 0f);
         CharacterController controller = player.AddComponent<CharacterController>();
         controller.height = 2f;
@@ -107,13 +108,13 @@ public class BRGameplayPhysicsPlayModeTests
         GameObject weaponObject = new GameObject("PlayMode Test Weapon");
         weaponObject.SetActive(false);
         BRHitscanWeapon weapon = weaponObject.AddComponent<BRHitscanWeapon>();
-        weapon.magazineSize = 10;
+        weapon.magazineSize = 4;
         weapon.reserveAmmo = 12;
         weapon.reloadSeconds = 0.05f;
         weaponObject.SetActive(true);
 
-        Assert.AreEqual(10, weapon.AmmoInMagazine);
-        weapon.AmmoInMagazine = 4;
+        Assert.AreEqual(4, weapon.AmmoInMagazine);
+        weapon.magazineSize = 10;
         weapon.Reload();
         yield return new WaitForSeconds(0.12f);
 
