@@ -103,6 +103,28 @@ public class BRGameplayPhysicsPlayModeTests
     }
 
     [UnityTest]
+    public IEnumerator WeaponFireConsumesAmmoAndAddsRecoil()
+    {
+        GameObject cameraObject = new GameObject("PlayMode Test Aim Camera");
+        Camera aimCamera = cameraObject.AddComponent<Camera>();
+        GameObject weaponObject = new GameObject("PlayMode Test Firing Weapon");
+        BRHitscanWeapon weapon = weaponObject.AddComponent<BRHitscanWeapon>();
+        weapon.aimCamera = aimCamera;
+        weapon.shotsPerSecond = 20f;
+        MobileInputBridge.Instance.SetFire(true);
+
+        yield return new WaitForSeconds(0.12f);
+
+        MobileInputBridge.Instance.SetFire(false);
+        Assert.Less(weapon.AmmoInMagazine, weapon.magazineSize,
+            "Holding the fire input should consume magazine ammunition.");
+        Assert.Greater(weapon.CurrentRecoil.x, 0.05f,
+            "Firing should add upward recoil.");
+        Object.Destroy(cameraObject);
+        Object.Destroy(weaponObject);
+    }
+
+    [UnityTest]
     public IEnumerator WeaponReloadTransfersReserveAmmo()
     {
         GameObject weaponObject = new GameObject("PlayMode Test Weapon");
