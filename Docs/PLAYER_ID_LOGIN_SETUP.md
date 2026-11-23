@@ -1,31 +1,60 @@
 # Player identity and login integration
 
-## What is included
+## Implemented
 
-- `Assets/Integrations/UnityAuthentication/BRUnityAuthenticationClient.cs` is a Unity Authentication guest sign-in adapter.
-- `Server/src/server.js` verifies a Unity Authentication bearer token using Unity's published JWKS and returns the player ID from the verified `sub` claim.
-- The client adapter is behind the `BR_UNITY_AUTHENTICATION` scripting define so a clean checkout without Unity Services packages does not fail to compile.
+- `Assets/Integrations/UnityAuthentication/BRUnityAuthenticationClient.cs`: optional Unity Authentication guest sign-in adapter.
+- `Server/src/server.js`: verifies Unity-signed access tokens using Unity's published JWKS, checks issuer, RS256 signature, expiry and configured project ID, and derives identity only from the verified `sub` claim.
+- PostgreSQL-backed player profile records are created/updated after successful token verification.
+- A basic per-process IP rate limit protects the verification endpoint.
+- The Unity adapter is compile-gated until Unity Services packages and the scripting define are configured.
 
-## Unity setup
+## Unity project setup (you must do this in your Unity account)
 
-1. Open the project in Unity and install **Authentication** and **Services Core** using Package Manager.
-2. Configure the Unity project in the Unity Dashboard and link the project to its Unity Project ID.
-3. Add `BR_UNITY_AUTHENTICATION` to Player Settings > Other Settings > Scripting Define Symbols for the target platform.
-4. Add `BRUnityAuthenticationClient` to a scene object and subscribe to its `Authenticated` and `SignInFailed` events.
-5. Send the returned access token to your own backend over HTTPS as an `Authorization: Bearer <token>` header. Do not save or log the token.
+1. Open the project in a supported Unity Editor.
+2. Install **Authentication** and **Services Core** using Package Manager.
+3. Link the Unity project to your Unity Dashboard project and configure Authentication.
+4. Add `BR_UNITY_AUTHENTICATION` to Player Settings > Other Settings > Scripting Define Symbols for the target platform.
+5. Add `BRUnityAuthenticationClient` to a scene object and subscribe to its `Authenticated` and `SignInFailed` events.
+6. Send the access token from the `Authenticated` event to your deployed backend over HTTPS in an `Authorization: Bearer <token>` header. Do not save or log the token.
 
-The included client method is guest sign-in. Unity documents that anonymous accounts cannot be recovered on another device unless linked to an external identity provider; uninstalling the app can also lose an unlinked guest account. Add a supported external provider before treating this as a production account system.
+The included method creates an anonymous guest account. Guest identity is not a recoverable account by itself. To support account recovery and sign-in on a second device, enable a supported external identity provider in the Unity Dashboard and implement the matching provider SDK/token-linking flow. Do not advertise account recovery until that flow has been configured and tested. Do not send provider passwords or tokens to anyone.
 
-## Backend setup
+## Backend configuration
 
-1. Install Node.js 20 or newer.
-2. In this folder run `npm install`.
-3. Set `UNITY_PROJECT_ID` to the exact Project ID from the Unity Dashboard.
-4. Start with `npm start`.
-5. Deploy behind HTTPS and expose `POST /auth/verify` to the game client.
+Requirements: Node.js 20+, PostgreSQL 14+, and HTTPS at the public edge.
 
-The verifier fetches Unity's public signing keys from `https://player-auth.services.api.unity.com/.well-known/jwks.json`, verifies the RS256 signature and issuer, checks token expiry through the JWT library, checks `project_id`, and takes the account ID only from the verified `sub` claim. JWKS keys are cached and refreshed by the JOSE remote key-set helper.
+Environment variables:
+- `PORT`: optional, defaults to 8080.
+- `UNITY_PROJECT_ID`: required; exact project ID from the Unity Dashboard.
+- `DATABASE_URL`: required PostgreSQL connection string. Store it as a hosting secret, never in source control or the Unity client.
+- `PGSSLMODE=disable`: local development only. Production should use TLS with a trusted database certificate.
 
-## Important boundary
+Run locally from `Server/`:
 
-This is an authentication verification starter, not a complete production backend. It does not yet provide persistent profiles, password/email login, external-account linking, account recovery, database storage, rate limiting, match hosting, or server-authoritative physics. Never trust a player ID sent in a JSON body, and never put Unity Service Account credentials in the game client. Add deployment-level rate limiting, monitoring, database authorization, and abuse controls before public release.
+```sh
+npm install
+UNITY_PROJECT_ID="your-unity-project-id" DATABASE_URL="postgresql://..." npm start
+```
+
+Endpoints:
+- `GET /health`: checks database connectivity.
+- `POST /auth/verify`: requires a Unity access token in the Authorization header. It creates or updates a profile row and returns the verified player ID plus timestamps.
+
+The server creates the `player_profiles` table on startup. The ID is always taken from the verified token's `sub` claim; no client-supplied player ID is trusted.
+
+## Deployment checklist
+
+1. Create a private PostgreSQL database with automated backups.
+2. Deploy the `Server/` directory to a Node.js 20+ host.
+3. Set `UNITY_PROJECT_ID`, `DATABASE_URL`, and `PORT` as host environment variables/secrets.
+4. Require HTTPS and configure the host's health check to use `/health`.
+5. Configure platform-level rate limiting, request logging without authorization headers, alerts, and database backups.
+6. Test invalid, expired, wrong-project, and valid Unity tokens before enabling the endpoint in the game client.
+
+## Important limitations
+
+- The included sign-in is guest sign-in only. A recoverable external account provider is not yet linked.
+- The in-process rate limiter resets when the service restarts and is not shared between multiple instances. Use gateway-level or shared-store rate limiting for public production traffic.
+- This is an identity/profile starter, not a full game backend. It does not implement matchmaking, authoritative network simulation, persistent inventory, password reset, moderation, or account support tooling.
+- Unity project metadata and Package Manager manifest are absent from this repository snapshot. Unity Editor version and packages must be selected and configured by the project owner before an Android build can be verified.
+- Do not put Unity Service Account secrets, database credentials, or signing keys in the client APK.
