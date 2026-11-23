@@ -54,3 +54,9 @@ Unity Editor and Android Build Support are required on a Windows, macOS, or Linu
 - Unity Editor menu: **Tools → Battle Royale → Run Anti-Cheat Rule Checks**.
 - Prints PASS/FAIL results for movement, fire cadence, ammo/reload, damage, pickup distance, and resource bounds.
 - Guide: [Anti-cheat tests](Docs/ANTI_CHEAT_TESTS.md).
+
+
+## Authoritative match-state example
+- In-memory server-owned player position, health, ammo, reload timing, and elimination state.
+- Server-side movement, firing, and pickup validation before accepting state changes.
+- Integration notes: [Authoritative match service](Docs/AUTHORITATIVE_MATCH_SERVICE.md).
